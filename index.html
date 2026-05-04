@@ -655,7 +655,7 @@ textarea.form-input{resize:vertical;min-height:80px}
 </div>
 
 <script>
-  const STATE={user:null,section:'dashboard',persona:'coder',messages:[],totalTokens:0,totalMessages:0,votes:{up:0,down:0},files:[],memory:['Краткие ответы','Примеры с кодом'],team:[{email:'owner@n.ru',role:'Admin'},{email:'mgr@n.ru',role:'Editor'}],brand:{name:'NexusAI',domain:'nexusai.ru',logo:'N',color:'#3b82f6'},settings:{customPrompt:''},selectedModel:'llama-3.3-70b-versatile',selectedProvider:'groq',currentPlan:'basic',usage:{messages_this_month:0,tokens_this_month:0,cost_this_month:0,last_reset:new Date().toISOString().slice(0,7)},usageHistory:[],tenants:[{id:'t1',name:'Рога и Копыта',domain:'rk.ru',plan:'pro',members:12,messages:4320,status:'active'},{id:'t2',name:'Стройкомплект',domain:'st.ru',plan:'basic',members:5,messages:1240,status:'active'},{id:'t3',name:'АгроТех',domain:'ag.ru',plan:'free',members:2,messages:87,status:'trial'}],currentTenant:'t1',rbacUsers:[{email:'ivan@n.ru',role:'owner',org:'NexusAI'},{email:'anna@n.ru',role:'admin',org:'NexusAI'},{email:'petr@n.ru',role:'editor',org:'NexusAI'}],auditLog:[]};
+const STATE={user:null,section:'dashboard',persona:'coder',messages:[],totalTokens:0,totalMessages:0,votes:{up:0,down:0},files:[],memory:['Краткие ответы','Примеры с кодом'],team:[{email:'owner@n.ru',role:'Admin'},{email:'mgr@n.ru',role:'Editor'}],brand:{name:'NexusAI',domain:'nexusai.ru',logo:'N',color:'#3b82f6'},settings:{customPrompt:''},selectedModel:'llama-3.3-70b-versatile',selectedProvider:'groq',currentPlan:'basic',usage:{messages_this_month:0,tokens_this_month:0,cost_this_month:0,last_reset:new Date().toISOString().slice(0,7)},usageHistory:[],tenants:[{id:'t1',name:'Рога и Копыта',domain:'rk.ru',plan:'pro',members:12,messages:4320,status:'active'},{id:'t2',name:'Стройкомплект',domain:'st.ru',plan:'basic',members:5,messages:1240,status:'active'},{id:'t3',name:'АгроТех',domain:'ag.ru',plan:'free',members:2,messages:87,status:'trial'}],currentTenant:'t1',rbacUsers:[{email:'ivan@n.ru',role:'owner',org:'NexusAI'},{email:'anna@n.ru',role:'admin',org:'NexusAI'},{email:'petr@n.ru',role:'editor',org:'NexusAI'}],auditLog:[]};
 
 const MODELS={groq:[{id:'llama-3.3-70b-versatile',name:'LLaMA 3.3 70B',speed:'fast',cost:'low'},{id:'llama-3.1-8b-instant',name:'LLaMA 3.1 8B',speed:'ultra',cost:'minimal'},{id:'mixtral-8x7b-32768',name:'Mixtral 8x7B',speed:'fast',cost:'low'}],openai:[{id:'gpt-4o',name:'GPT-4o',speed:'medium',cost:'high'},{id:'gpt-4o-mini',name:'GPT-4o Mini',speed:'fast',cost:'medium'},{id:'o1-mini',name:'O1 Mini',speed:'slow',cost:'very-high'}],anthropic:[{id:'claude-3-5-sonnet',name:'Claude 3.5 Sonnet',speed:'medium',cost:'high'}],gemini:[{id:'gemini-2.0-flash',name:'Gemini 2.0 Flash',speed:'ultra',cost:'low'}]};
 
@@ -667,83 +667,432 @@ const RBAC_ROLES={owner:{label:'Owner',color:'#22c55e',icon:'👑',permissions:[
 
 const PERMISSION_MATRIX=[{action:'Использовать AI',owner:true,admin:true,editor:true,viewer:false},{action:'Аналитика',owner:true,admin:true,editor:false,viewer:false},{action:'Команда',owner:true,admin:true,editor:false,viewer:false},{action:'Настройки',owner:true,admin:true,editor:false,viewer:false},{action:'Audit Log',owner:true,admin:true,editor:false,viewer:false},{action:'Чужие чаты',owner:true,admin:true,editor:false,viewer:true},{action:'White Label',owner:true,admin:false,editor:false,viewer:false},{action:'API',owner:true,admin:true,editor:false,viewer:false},{action:'Telegram',owner:true,admin:true,editor:false,viewer:false}];
 
-function $(id){return document.getElementById(id)}
-function now(){return new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})}
-function nowFull(){return new Date().toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
-function toast(msg,type='ok'){const w=$('toastWrap'),t=document.createElement('div');t.className='toast'+(type==='error'?' err':type==='warn'?' warn':'');t.textContent=msg;w.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(8px)';setTimeout(()=>t.remove(),300)},3000)}
-
-function audit(type,action,detail=''){STATE.auditLog.unshift({id:Date.now(),type,action,detail,user:STATE.user?STATE.user.email:'system',time:nowFull(),ip:'192.168.1.'+Math.floor(Math.random()*254+1)});if(STATE.auditLog.length>500)STATE.auditLog.pop()}
-
-function trackUsage(type,qty){const month=new Date().toISOString().slice(0,7);if(STATE.usage.last_reset!==month){STATE.usageHistory.push({...STATE.usage});STATE.usage={messages_this_month:0,tokens_this_month:0,cost_this_month:0,last_reset:month}}if(type==='message'){STATE.usage.messages_this_month+=qty;STATE.usage.cost_this_month+=qty*0.5}else if(type==='tokens'){STATE.usage.tokens_this_month+=qty;STATE.usage.cost_this_month+=(qty/1000)*0.02}localStorage.setItem('nai_usage',JSON.stringify(STATE.usage));updateUsageDashboard()}
-
-function checkLimits(){const lim=PLANS[STATE.currentPlan].limits;if(STATE.usage.messages_this_month>=lim.messages){toast('Лимит сообщений! Обновите план.','error');return false}const pct=(STATE.usage.messages_this_month/lim.messages)*100;if(pct>=80&&pct<81)toast('Использовано '+Math.round(pct)+'% лимита','warn');return true}
-
-function updateUsageDashboard(){const plan=PLANS[STATE.currentPlan],u=STATE.usage;if(!$('uMsgTxt'))return;const msgPct=Math.min((u.messages_this_month/plan.limits.messages)*100,100);$('uMsgBar').style.width=msgPct+'%';$('uMsgBar').className='usage-bar-fill'+(msgPct>=80?' warn':'');$('uMsgTxt').textContent=u.messages_this_month.toLocaleString('ru')+' / '+plan.limits.messages.toLocaleString('ru');$('uMsgRem').textContent='Осталось: '+(plan.limits.messages-u.messages_this_month).toLocaleString('ru');const tokPct=Math.min((u.tokens_this_month/plan.limits.tokens)*100,100);$('uTokBar').style.width=tokPct+'%';$('uTokTxt').textContent=Math.round(u.tokens_this_month/1000)+'K / '+Math.round(plan.limits.tokens/1000)+'K';$('uTokRem').textContent='Осталось: '+Math.round((plan.limits.tokens-u.tokens_this_month)/1000)+'K';$('uPlanName').textContent=plan.name;$('uPlanName').style.color=plan.color;$('uCost').textContent=u.cost_this_month.toFixed(2)+' ₽';$('planBadge').textContent=plan.name}
-
-function renderTenants(){const tbody=$('tenantTable');if(!tbody)return;tbody.innerHTML=STATE.tenants.map((t,i)=>`<tr><td><b>${t.name}</b></td><td style="color:var(--text-2)">${t.domain}</td><td><span class="badge badge-${t.plan==='pro'?'purple':t.plan==='basic'?'blue':'warn'}">${PLANS[t.plan].name}</span></td><td>${t.members}</td><td>${t.messages.toLocaleString('ru')}</td><td><span class="badge badge-${t.status==='active'?'green':'warn'}">${t.status==='active'?'Активна':'Пробный'}</span></td><td><button class="btn btn-sm" onclick="switchTenant('${t.id}')">Войти</button></td></tr>`).join('')}
-
-function addTenant(){const name=prompt('Название:');if(!name)return;const domain=prompt('Домен:')||'company.ru';STATE.tenants.push({id:'t'+Date.now(),name,domain,plan:'free',members:1,messages:0,status:'trial'});renderTenants();audit('tenant','Добавлена',name);renderTenantChart();toast('Организация добавлена')}
-
-function switchTenant(id){STATE.currentTenant=id;const t=STATE.tenants.find(x=>x.id===id);toast('Переключено: '+t.name);audit('tenant','Смена',t.name);$('kpiOrgs').textContent=STATE.tenants.length}
-
-function renderTenantChart(){const ctx=$('tenantChart');if(!ctx)return;if(STATE._tenantChart)STATE._tenantChart.destroy();STATE._tenantChart=new Chart(ctx,{type:'bar',data:{labels:STATE.tenants.map(t=>t.name),datasets:[{label:'Сообщений',data:STATE.tenants.map(t=>t.messages),backgroundColor:['#3b82f6','#8b5cf6','#22c55e']}]},options:{responsive:true,plugins:{legend:{display:false}}}})}
-
-function renderRoles(){const el=$('rolesList');if(!el)return;el.innerHTML=Object.entries(RBAC_ROLES).map(([key,role])=>`<div class="role-card"><h4>${role.icon} <span style="color:${role.color}">${role.label}</span></h4><div class="perm-list">${role.permissions.map(p=>`<span class="perm-tag">${p}</span>`).join('')}</div></div>`).join('')}
-
-function renderRbacUsers(){const el=$('rbacUserList');if(!el)return;el.innerHTML=STATE.rbacUsers.map((u,i)=>`<div class="team-row"><div><div style="font-weight:700;font-size:13px">${u.email}</div><div style="font-size:11px;color:var(--text-2)">${u.org}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="badge" style="background:rgba(59,130,246,.15);color:${RBAC_ROLES[u.role].color}">${RBAC_ROLES[u.role].icon} ${RBAC_ROLES[u.role].label}</span><button class="btn btn-sm" onclick="removeRbacUser(${i})">✕</button></div></div>`).join('')}
-
-function addRbacUser(){const email=$('rbacEmail').value.trim(),role=$('rbacRole').value;if(!email)return toast('Введите email','error');if(STATE.rbacUsers.find(u=>u.email===email))return toast('Уже существует','warn');STATE.rbacUsers.push({email,role,org:STATE.brand.name});$('rbacEmail').value='';renderRbacUsers();audit('team','Добавлен',email+' → '+role);toast('Добавлен')}
-
-function removeRbacUser(i){const u=STATE.rbacUsers[i];STATE.rbacUsers.splice(i,1);renderRbacUsers();audit('team','Удалён',u.email);toast('Удалён')}
-
-function renderPermMatrix(){const el=$('permMatrix');if(!el)return;el.innerHTML=PERMISSION_MATRIX.map(row=>`<tr><td>${row.action}</td><td style="text-align:center">${row.owner?'✅':'❌'}</td><td style="text-align:center">${row.admin?'✅':'❌'}</td><td style="text-align:center">${row.editor?'✅':'❌'}</td><td style="text-align:center">${row.viewer?'✅':'❌'}</td></tr>`).join('')}
-
-function hasPermission(permission){const userRole=STATE.rbacUsers.find(u=>u.email===STATE.user?.email)?.role||'viewer';if(RBAC_ROLES[userRole].permissions.includes('all'))return true;return RBAC_ROLES[userRole].permissions.includes(permission)}
-
-const AUDIT_ICONS={auth:{icon:'🔑',bg:'rgba(59,130,246,.15)'},chat:{icon:'💬',bg:'rgba(34,197,94,.15)'},settings:{icon:'⚙️',bg:'rgba(139,92,246,.15)'},team:{icon:'👥',bg:'rgba(245,158,11,.15)'},tenant:{icon:'🏢',bg:'rgba(248,113,113,.15)'}};
-
-function renderAuditLog(){const el=$('auditLogList'),filter=$('auditFilter')?.value||'all';if(!el)return;const logs=filter==='all'?STATE.auditLog:STATE.auditLog.filter(l=>l.type===filter);if(logs.length===0){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text-3)">Нет записей</div>';return}const ic=AUDIT_ICONS;el.innerHTML=logs.slice(0,100).map(l=>`<div class="audit-row"><div class="audit-icon" style="background:${(ic[l.type]||ic.chat).bg}">${(ic[l.type]||ic.chat).icon}</div><div class="audit-info"><div style="font-weight:600">${l.action}</div><div style="color:var(--text-2);margin-top:2px">${l.user} · ${l.detail}</div><div style="color:var(--text-3);font-size:11px;margin-top:2px">IP: ${l.ip}</div></div><div class="audit-time">${l.time}</div></div>`).join('')}
-
-function exportAuditLog(){const rows=STATE.auditLog.map(l=>`"${l.time}","${l.type}","${l.action}","${l.user}","${l.detail}","${l.ip}"`);const csv='Время,Тип,Действие,Пользователь,Детали,IP\n'+rows.join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='audit-log-'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('Экспортирован')}
-
-function navTo(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$('page-'+page).classList.add('active')}
-
-function demoLogin(){$('loginEmail').value='demo@nexusai.ru';$('loginPwd').value='demo123';doLogin()}
-
-function doLogin(){const email=$('loginEmail').value.trim(),pwd=$('loginPwd').value;if(!email||!pwd)return toast('Заполните поля','error');STATE.user={name:'Demo User',email,plan:'Business'};$('userName').textContent=STATE.user.name;$('settingsName').value=STATE.user.name;$('settingsEmail').value=STATE.user.email;audit('auth','Вход',email);navTo('app');showSection('dashboard');toast('Добро пожаловать! 👋')}
-
-function doLogout(){audit('auth','Выход',STATE.user?.email||'');STATE.user=null;STATE.messages=[];navTo('landing')}
-
-function showSection(s){STATE.section=s;document.querySelectorAll('.section').forEach(x=>{x.style.display='none';x.classList.remove('active')});const sec=$('sec-'+s);if(!sec)return;sec.style.display=s==='chat'?'flex':'block';sec.classList.add('active');document.querySelectorAll('.nav-item').forEach((n,i)=>{n.classList.toggle('active',['dashboard','chat','analytics','tenants','rbac','audit','brand','memory','api','telegram','settings'][i]===s)});const titles={dashboard:'Дашборд',chat:'Чат',analytics:'Аналитика',tenants:'Организации',rbac:'RBAC',audit:'Audit',brand:'Brand',memory:'Память',api:'API',telegram:'Telegram',settings:'Настройки'};$('toolbarTitle').textContent=titles[s]||s;if(s==='chat'){renderPersonaBar();renderQuickChips();if(!STATE.messages.length)appendMessage('bot',PERSONAS[STATE.persona].greeting)}if(s==='dashboard'){renderDash();updateUsageDashboard()}if(s==='analytics')renderAnalyticsCharts();if(s==='memory')renderMemory();if(s==='brand')updateBrandPreview();if(s==='tenants'){renderTenants();renderTenantChart()}if(s==='rbac'){renderRoles();renderRbacUsers();renderPermMatrix()}if(s==='audit')renderAuditLog()}
-
-function updateModels(){const provider=$('providerSelect').value;const ms=$('modelSelect');ms.innerHTML='';MODELS[provider].forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;ms.appendChild(o)});STATE.selectedProvider=provider;STATE.selectedModel=MODELS[provider][0].id;$('modelBadge').textContent='⚡ '+MODELS[provider][0].speed}
-
-function onModelChange(){const id=$('modelSelect').value;STATE.selectedModel=id;const m=MODELS[STATE.selectedProvider].find(x=>x.id===id);$('modelBadge').textContent='⚡ '+m.speed}
-
-function toggleTheme(){document.body.classList.toggle('light-theme');const isLight=document.body.classList.contains('light-theme');localStorage.setItem('nai_theme',isLight?'light':'dark');$('themeIcon').textContent=isLight?'🌙':'☀️'}
-
 const charts={};
 
-function renderPersonaBar(){const bar=$('personaBar');if(!bar)return;bar.innerHTML='';Object.entries(PERSONAS).forEach(([k,p])=>{const b=document.createElement('button');b.className='persona-chip'+(STATE.persona===k?' active':'');b.textContent=p.icon+' '+p.name;b.onclick=()=>{STATE.persona=k;renderPersonaBar();renderQuickChips();$('avatarPersona').textContent=p.name};bar.appendChild(b)})}
+function $(id){return document.getElementById(id)}
+function now(){return new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}
+function nowFull(){return new Date().toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 
-function renderQuickChips(){const row=$('quickChips');if(!row)return;row.innerHTML='';(PERSONAS[STATE.persona].chips||[]).forEach(t=>{const c=document.createElement('button');c.className='chip';c.textContent=t;c.onclick=()=>{$('chatInput').value=t;$('chatInput').focus()};row.appendChild(c)})}
+function safeGet(key){try{return localStorage.getItem(key)}catch(e){return null}}
+function safeSet(key,val){try{localStorage.setItem(key,val)}catch(e){}}
 
-function appendMessage(role,text){const box=$('messages'),idx=STATE.messages.length;const m=document.createElement('div');m.className='msg '+role;m.innerHTML=`<div class="msg-avatar">${role==='bot'?PERSONAS[STATE.persona].icon:'U'}</div><div class="msg-body"><div class="msg-meta">${role==='bot'?'AI':'Вы'} · ${now()}</div><div class="bubble" id="bubble-${idx}">${text}</div>${role==='bot'?`<div class="msg-actions"><button class="vote-btn" onclick="vote(${idx},'up',this)">👍</button><button class="vote-btn" onclick="vote(${idx},'down',this)">👎</button><button class="vote-btn" onclick="speak(${idx})">🔊</button></div>`:''}</div>`;box.appendChild(m);box.scrollTop=box.scrollHeight;STATE.messages.push({role,text,vote:null});return idx}
+function toast(msg,type='ok'){
+  const w=$('toastWrap');
+  if(!w) return;
+  const t=document.createElement('div');
+  t.className='toast'+(type==='error'?' err':type==='warn'?' warn':'');
+  t.textContent=msg;
+  w.appendChild(t);
+  setTimeout(()=>{
+    t.style.opacity='0';
+    t.style.transform='translateY(8px)';
+    setTimeout(()=>t.remove(),300);
+  },3000);
+}
 
-function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}}
+function audit(type,action,detail=''){
+  STATE.auditLog.unshift({
+    id:Date.now(),
+    type,
+    action,
+    detail,
+    user:STATE.user?STATE.user.email:'system',
+    time:nowFull(),
+    ip:'192.168.1.'+Math.floor(Math.random()*254+1)
+  });
+  if(STATE.auditLog.length>500) STATE.auditLog.pop();
+}
 
-async function sendMessage(){const input=$('chatInput'),text=input.value.trim();if(!text)return;if(!checkLimits())return;appendMessage('user',text);STATE.totalMessages++;trackUsage('message',1);audit('chat','Сообщение',text.slice(0,60));input.value='';const idx=appendMessage('bot','…');try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'system',content:PERSONAS[STATE.persona].system+(STATE.settings.customPrompt ? '\nДоп. инструкции: ' + STATE.settings.customPrompt : '')},
-        {role:'user',content:text}
-      ]
-    })});
+function navTo(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=$('page-'+page);
+  if(el) el.classList.add('active');
+}
+
+function demoLogin(){
+  if($('loginEmail')) $('loginEmail').value='demo@nexusai.ru';
+  if($('loginPwd')) $('loginPwd').value='demo123';
+  doLogin();
+}
+
+function doLogin(){
+  const email=$('loginEmail')?.value.trim();
+  const pwd=$('loginPwd')?.value;
+  if(!email||!pwd) return toast('Заполните поля','error');
+  STATE.user={name:'Demo User',email,plan:'Business'};
+  if($('userName')) $('userName').textContent=STATE.user.name;
+  if($('settingsName')) $('settingsName').value=STATE.user.name;
+  if($('settingsEmail')) $('settingsEmail').value=STATE.user.email;
+  audit('auth','Вход',email);
+  navTo('app');
+  showSection('dashboard');
+  toast('Добро пожаловать! 👋');
+}
+
+function doLogout(){
+  audit('auth','Выход',STATE.user?.email||'');
+  STATE.user=null;
+  STATE.messages=[];
+  navTo('landing');
+}
+
+function trackUsage(type,qty){
+  const month=new Date().toISOString().slice(0,7);
+  if(STATE.usage.last_reset!==month){
+    STATE.usageHistory.push({...STATE.usage});
+    STATE.usage={messages_this_month:0,tokens_this_month:0,cost_this_month:0,last_reset:month};
+  }
+  if(type==='message'){
+    STATE.usage.messages_this_month+=qty;
+    STATE.usage.cost_this_month+=qty*0.5;
+  }else if(type==='tokens'){
+    STATE.usage.tokens_this_month+=qty;
+    STATE.usage.cost_this_month+=(qty/1000)*0.02;
+  }
+  safeSet('nai_usage',JSON.stringify(STATE.usage));
+  updateUsageDashboard();
+}
+
+function checkLimits(){
+  const lim=PLANS[STATE.currentPlan].limits;
+  if(STATE.usage.messages_this_month>=lim.messages){
+    toast('Лимит сообщений исчерпан','error');
+    return false;
+  }
+  return true;
+}
+
+function updateUsageDashboard(){
+  const plan=PLANS[STATE.currentPlan];
+  const u=STATE.usage;
+  if(!$('uMsgTxt')) return;
+
+  const msgPct=Math.min((u.messages_this_month/plan.limits.messages)*100,100);
+  $('uMsgBar').style.width=msgPct+'%';
+  $('uMsgBar').className='usage-bar-fill'+(msgPct>=80?' warn':'');
+  $('uMsgTxt').textContent=u.messages_this_month.toLocaleString('ru-RU')+' / '+(plan.limits.messages===Infinity?'∞':plan.limits.messages.toLocaleString('ru-RU'));
+  $('uMsgRem').textContent='Осталось: '+(plan.limits.messages===Infinity?'∞':(plan.limits.messages-u.messages_this_month).toLocaleString('ru-RU'));
+
+  const tokPct=plan.limits.tokens===Infinity?0:Math.min((u.tokens_this_month/plan.limits.tokens)*100,100);
+  $('uTokBar').style.width=tokPct+'%';
+  $('uTokTxt').textContent=Math.round(u.tokens_this_month/1000)+'K / '+(plan.limits.tokens===Infinity?'∞':Math.round(plan.limits.tokens/1000)+'K');
+  $('uTokRem').textContent='Осталось: '+(plan.limits.tokens===Infinity?'∞':Math.round((plan.limits.tokens-u.tokens_this_month)/1000)+'K');
+
+  $('uPlanName').textContent=plan.name;
+  $('uPlanName').style.color=plan.color;
+  $('uCost').textContent=u.cost_this_month.toFixed(2)+' ₽';
+  if($('planBadge')) $('planBadge').textContent=plan.name;
+}
+
+function renderTenants(){
+  const tbody=$('tenantTable');
+  if(!tbody) return;
+  tbody.innerHTML=STATE.tenants.map(t=>`
+    <tr>
+      <td><b>${t.name}</b></td>
+      <td style="color:var(--text-2)">${t.domain}</td>
+      <td><span class="badge badge-${t.plan==='pro'?'purple':t.plan==='basic'?'blue':'warn'}">${PLANS[t.plan].name}</span></td>
+      <td>${t.members}</td>
+      <td>${t.messages.toLocaleString('ru-RU')}</td>
+      <td><span class="badge badge-${t.status==='active'?'green':'warn'}">${t.status==='active'?'Активна':'Пробный'}</span></td>
+      <td><button class="btn btn-sm" onclick="switchTenant('${t.id}')">Войти</button></td>
+    </tr>
+  `).join('');
+}
+
+function addTenant(){
+  const name=prompt('Название организации:');
+  if(!name) return;
+  const domain=prompt('Домен:')||'company.ru';
+  STATE.tenants.push({id:'t'+Date.now(),name,domain,plan:'free',members:1,messages:0,status:'trial'});
+  renderTenants();
+  renderTenantChart();
+  audit('tenant','Добавлена организация',name);
+  toast('Организация добавлена');
+}
+
+function switchTenant(id){
+  STATE.currentTenant=id;
+  const t=STATE.tenants.find(x=>x.id===id);
+  if(t) toast('Активная организация: '+t.name);
+  audit('tenant','Смена организации',t?.name||id);
+}
+
+function renderTenantChart(){
+  const canvas=$('tenantChart');
+  if(!canvas) return;
+  if(charts.tenantChart) charts.tenantChart.destroy();
+  charts.tenantChart=new Chart(canvas,{
+    type:'bar',
+    data:{
+      labels:STATE.tenants.map(t=>t.name),
+      datasets:[{
+        label:'Сообщений',
+        data:STATE.tenants.map(t=>t.messages),
+        backgroundColor:['#3b82f6','#8b5cf6','#22c55e','#f59e0b']
+      }]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}}}
+  });
+}
+
+function renderRoles(){
+  const el=$('rolesList');
+  if(!el) return;
+  el.innerHTML=Object.entries(RBAC_ROLES).map(([key,role])=>`
+    <div class="role-card">
+      <h4>${role.icon} <span style="color:${role.color}">${role.label}</span></h4>
+      <div class="perm-list">${role.permissions.map(p=>`<span class="perm-tag">${p}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+function renderRbacUsers(){
+  const el=$('rbacUserList');
+  if(!el) return;
+  el.innerHTML=STATE.rbacUsers.map((u,i)=>`
+    <div class="team-row">
+      <div>
+        <div style="font-weight:700;font-size:13px">${u.email}</div>
+        <div style="font-size:11px;color:var(--text-2)">${u.org}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="badge" style="background:rgba(59,130,246,.15);color:${RBAC_ROLES[u.role].color}">${RBAC_ROLES[u.role].icon} ${RBAC_ROLES[u.role].label}</span>
+        <button class="btn btn-sm" onclick="removeRbacUser(${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addRbacUser(){
+  const email=$('rbacEmail').value.trim();
+  const role=$('rbacRole').value;
+  if(!email) return toast('Введите email','error');
+  if(STATE.rbacUsers.find(u=>u.email===email)) return toast('Пользователь уже есть','warn');
+  STATE.rbacUsers.push({email,role,org:STATE.brand.name});
+  $('rbacEmail').value='';
+  renderRbacUsers();
+  audit('team','Добавлен пользователь RBAC',email+' → '+role);
+  toast('Пользователь добавлен');
+}
+
+function removeRbacUser(i){
+  const u=STATE.rbacUsers[i];
+  STATE.rbacUsers.splice(i,1);
+  renderRbacUsers();
+  audit('team','Удалён пользователь RBAC',u?.email||'');
+  toast('Пользователь удалён');
+}
+
+function renderPermMatrix(){
+  const el=$('permMatrix');
+  if(!el) return;
+  el.innerHTML=PERMISSION_MATRIX.map(row=>`
+    <tr>
+      <td>${row.action}</td>
+      <td style="text-align:center">${row.owner?'✅':'❌'}</td>
+      <td style="text-align:center">${row.admin?'✅':'❌'}</td>
+      <td style="text-align:center">${row.editor?'✅':'❌'}</td>
+      <td style="text-align:center">${row.viewer?'✅':'❌'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderAuditLog(){
+  const el=$('auditLogList');
+  const filter=$('auditFilter')?.value||'all';
+  if(!el) return;
+  const logs=filter==='all'?STATE.auditLog:STATE.auditLog.filter(x=>x.type===filter);
+  if(!logs.length){
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text-3)">Нет записей</div>';
+    return;
+  }
+  el.innerHTML=logs.slice(0,100).map(l=>`
+    <div class="audit-row">
+      <div class="audit-icon" style="background:rgba(59,130,246,.15)">📝</div>
+      <div class="audit-info">
+        <div style="font-weight:600">${l.action}</div>
+        <div style="color:var(--text-2);margin-top:2px">${l.user} · ${l.detail}</div>
+        <div style="color:var(--text-3);font-size:11px;margin-top:2px">IP: ${l.ip}</div>
+      </div>
+      <div class="audit-time">${l.time}</div>
+    </div>
+  `).join('');
+}
+
+function exportAuditLog(){
+  const rows=STATE.auditLog.map(l=>`"${l.time}","${l.type}","${l.action}","${l.user}","${l.detail}","${l.ip}"`);
+  const csv='Время,Тип,Действие,Пользователь,Детали,IP\n'+rows.join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='audit-log-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  toast('Audit CSV экспортирован');
+}
+
+function showSection(s){
+  STATE.section=s;
+  document.querySelectorAll('.section').forEach(x=>{
+    x.style.display='none';
+    x.classList.remove('active');
+  });
+  const sec=$('sec-'+s);
+  if(!sec) return;
+  sec.style.display=s==='chat'?'flex':'block';
+  sec.classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach((n,i)=>{
+    n.classList.toggle('active',['dashboard','chat','analytics','tenants','rbac','audit','brand','memory','api','telegram','settings'][i]===s);
+  });
+
+  const titles={dashboard:'Дашборд',chat:'Чат',analytics:'Аналитика',tenants:'Организации',rbac:'RBAC',audit:'Audit',brand:'Brand',memory:'Память',api:'API',telegram:'Telegram',settings:'Настройки'};
+  $('toolbarTitle').textContent=titles[s]||s;
+
+  if(s==='chat'){
+    renderPersonaBar();
+    renderQuickChips();
+    if(!STATE.messages.length) appendMessage('bot',PERSONAS[STATE.persona].greeting);
+  }
+  if(s==='dashboard'){renderDash();updateUsageDashboard();}
+  if(s==='analytics') renderAnalyticsCharts();
+  if(s==='memory') renderMemory();
+  if(s==='brand') updateBrandPreview();
+  if(s==='tenants'){renderTenants();renderTenantChart();}
+  if(s==='rbac'){renderRoles();renderRbacUsers();renderPermMatrix();}
+  if(s==='audit') renderAuditLog();
+}
+
+function updateModels(){
+  const provider=$('providerSelect')?.value||'groq';
+  const ms=$('modelSelect');
+  if(!ms) return;
+  ms.innerHTML='';
+  MODELS[provider].forEach(m=>{
+    const o=document.createElement('option');
+    o.value=m.id;
+    o.textContent=m.name;
+    ms.appendChild(o);
+  });
+  STATE.selectedProvider=provider;
+  STATE.selectedModel=MODELS[provider][0].id;
+  if($('modelBadge')) $('modelBadge').textContent='⚡ '+MODELS[provider][0].speed;
+}
+
+function onModelChange(){
+  const id=$('modelSelect').value;
+  STATE.selectedModel=id;
+  const m=MODELS[STATE.selectedProvider].find(x=>x.id===id);
+  if($('modelBadge')&&m) $('modelBadge').textContent='⚡ '+m.speed;
+}
+
+function toggleTheme(){
+  document.body.classList.toggle('light-theme');
+  const isLight=document.body.classList.contains('light-theme');
+  safeSet('nai_theme',isLight?'light':'dark');
+  if($('themeIcon')) $('themeIcon').textContent=isLight?'🌙':'☀️';
+}
+
+function renderPersonaBar(){
+  const bar=$('personaBar');
+  if(!bar) return;
+  bar.innerHTML='';
+  Object.entries(PERSONAS).forEach(([k,p])=>{
+    const b=document.createElement('button');
+    b.className='persona-chip'+(STATE.persona===k?' active':'');
+    b.textContent=p.icon+' '+p.name;
+    b.onclick=()=>{
+      STATE.persona=k;
+      renderPersonaBar();
+      renderQuickChips();
+      if($('avatarPersona')) $('avatarPersona').textContent=p.name;
+    };
+    bar.appendChild(b);
+  });
+}
+
+function renderQuickChips(){
+  const row=$('quickChips');
+  if(!row) return;
+  row.innerHTML='';
+  (PERSONAS[STATE.persona].chips||[]).forEach(t=>{
+    const c=document.createElement('button');
+    c.className='chip';
+    c.textContent=t;
+    c.onclick=()=>{
+      $('chatInput').value=t;
+      $('chatInput').focus();
+    };
+    row.appendChild(c);
+  });
+}
+
+function appendMessage(role,text){
+  const box=$('messages');
+  const idx=STATE.messages.length;
+  const m=document.createElement('div');
+  m.className='msg '+role;
+  m.innerHTML=`
+    <div class="msg-avatar">${role==='bot'?PERSONAS[STATE.persona].icon:'U'}</div>
+    <div class="msg-body">
+      <div class="msg-meta">${role==='bot'?'AI':'Вы'} · ${now()}</div>
+      <div class="bubble" id="bubble-${idx}">${text}</div>
+      ${role==='bot'
+        ? `<div class="msg-actions">
+            <button class="vote-btn up" onclick="vote(${idx},'up',this)">👍</button>
+            <button class="vote-btn dn" onclick="vote(${idx},'down',this)">👎</button>
+            <button class="vote-btn" onclick="speak(${idx})">🔊</button>
+          </div>`
+        : ''
+      }
+    </div>
+  `;
+  box.appendChild(m);
+  box.scrollTop=box.scrollHeight;
+  STATE.messages.push({role,text,vote:null});
+  return idx;
+}
+
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+async function sendMessage(){
+  const input=$('chatInput');
+  const text=input.value.trim();
+  if(!text) return;
+  if(!checkLimits()) return;
+
+  appendMessage('user',text);
+  STATE.totalMessages++;
+  trackUsage('message',1);
+  audit('chat','Сообщение',text.slice(0,60));
+  input.value='';
+
+  const idx=appendMessage('bot','…');
+
+  try{
+    const systemText=PERSONAS[STATE.persona].system+(STATE.settings.customPrompt?'\nДоп. инструкции: '+STATE.settings.customPrompt:'');
+    const r=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        messages:[
+          {role:'system',content:systemText},
+          {role:'user',content:text}
+        ]
+      })
+    });
     const d=await r.json();
     const reply=d?.choices?.[0]?.message?.content||'Ошибка API';
-    STATE.totalTokens+=d?.usage?.total_tokens||Math.max(20,Math.round(reply.length*1.5));
-    trackUsage('tokens',d?.usage?.total_tokens||Math.max(20,Math.round(reply.length*1.5)));
+    const usedTokens=d?.usage?.total_tokens||Math.max(20,Math.round(reply.length*1.5));
+    STATE.totalTokens+=usedTokens;
+    trackUsage('tokens',usedTokens);
     streamText(idx,reply);
   }catch(e){
-    const fallback='Ошибка запроса. Проверьте /api/chat или ключи API.';
-    streamText(idx,fallback);
+    streamText(idx,'Ошибка запроса. Проверьте /api/chat или ключи API.');
     toast('Ошибка API','error');
     audit('chat','Ошибка API',String(e.message||e).slice(0,120));
   }
@@ -792,21 +1141,16 @@ function speak(idx){
 
 function testVoice(){
   const botIndex=STATE.messages.findIndex(m=>m.role==='bot');
-  if(botIndex>=0) speak(botIndex);
-  else {
-    const u=new SpeechSynthesisUtterance('Тест озвучки NexusAI.');
-    u.lang='ru-RU';
-    window.speechSynthesis.speak(u);
-  }
+  if(botIndex>=0) return speak(botIndex);
+  const u=new SpeechSynthesisUtterance('Тест озвучки NexusAI.');
+  u.lang='ru-RU';
+  window.speechSynthesis.speak(u);
 }
 
 function stopVoice(){
   window.speechSynthesis?.cancel();
 }
 
-// =============================================
-// FILES
-// =============================================
 function handleFiles(e){
   const wrap=$('fileChips');
   if(!wrap) return;
@@ -820,9 +1164,6 @@ function handleFiles(e){
   toast('Файлы добавлены 📎');
 }
 
-// =============================================
-// TEMPLATES
-// =============================================
 function openTemplates(){
   const body=$('templateBody');
   if(!body) return;
@@ -841,9 +1182,6 @@ function openTemplates(){
   openModal('mTemplates');
 }
 
-// =============================================
-// SHARE
-// =============================================
 function shareChat(){
   const payload={persona:STATE.persona,messages:STATE.messages,brand:STATE.brand,ts:Date.now()};
   const link=location.origin+'/shared/'+btoa(JSON.stringify(payload)).slice(0,200);
@@ -859,13 +1197,10 @@ function copyShareLink(){
   toast('Ссылка скопирована 📋');
 }
 
-// =============================================
-// PDF EXPORT
-// =============================================
 function exportPdf(){
-  const { jsPDF }=window.jspdf||{};
-  if(!jsPDF) return toast('jsPDF не загружен','error');
-  const doc=new jsPDF();
+  const jsp=window.jspdf;
+  if(!jsp||!jsp.jsPDF) return toast('jsPDF не загружен','error');
+  const doc=new jsp.jsPDF();
   doc.setFont('helvetica');
   doc.setFontSize(16);
   doc.text('NexusAI — Диалог',14,16);
@@ -884,9 +1219,6 @@ function exportPdf(){
   audit('chat','Экспорт PDF');
 }
 
-// =============================================
-// MEMORY
-// =============================================
 function renderMemory(){
   const el=$('memoryList');
   if(!el) return;
@@ -906,7 +1238,7 @@ function saveMemory(){
   STATE.memory.push(v);
   $('memoryInput').value='';
   renderMemory();
-  audit('settings','Добавлен факт в память',v.slice(0,60));
+  audit('settings','Добавлен факт',v.slice(0,60));
   toast('Факт сохранён 🧠');
 }
 
@@ -914,23 +1246,18 @@ function deleteMemory(i){
   const m=STATE.memory[i];
   STATE.memory.splice(i,1);
   renderMemory();
-  audit('settings','Удалён факт из памяти',String(m||'').slice(0,60));
+  audit('settings','Удалён факт',String(m||'').slice(0,60));
 }
 
-// =============================================
-// BRAND
-// =============================================
 function applyBrand(){
   STATE.brand.name=$('brandName').value||'NexusAI';
   STATE.brand.domain=$('brandDomain').value||'nexusai.ru';
   STATE.brand.logo=$('brandLogo').value||'N';
   STATE.brand.color=$('brandColor').value||'#3b82f6';
-
   document.documentElement.style.setProperty('--accent',STATE.brand.color);
   $('sidebarBrand').textContent=STATE.brand.name;
   $('sidebarDomain').textContent=STATE.brand.domain;
   $('sidebarLogo').textContent=STATE.brand.logo;
-
   updateBrandPreview();
   audit('settings','Применён бренд',STATE.brand.name);
   toast('Бренд применён ✅');
@@ -947,9 +1274,6 @@ function updateBrandPreview(){
   $('brandColor').value=STATE.brand.color;
 }
 
-// =============================================
-// TEAM
-// =============================================
 function renderTeam(){
   const el=$('teamList');
   if(!el) return;
@@ -982,9 +1306,6 @@ function removeTeam(i){
   audit('team','Удалён участник',u?.email||'');
 }
 
-// =============================================
-// DEBATE
-// =============================================
 function populateDebateSelects(){
   const keys=Object.keys(PERSONAS);
   [$('debateP1'),$('debateP2')].forEach((sel,idx)=>{
@@ -996,16 +1317,16 @@ function runDebate(){
   const p1=$('debateP1').value;
   const p2=$('debateP2').value;
   const topic=$('debateTopic').value||'?';
-  const t=`🎭 Дебаты: "${topic}"
+  $('debateResult').textContent=
+`🎭 Дебаты: "${topic}"
 
 ${PERSONAS[p1].icon} ${PERSONAS[p1].name}: "Я за. Мои аргументы: скорость, эффективность, масштабирование."
 
-${PERSONAS[p2].icon} ${PERSONAS[p2].name}: "Я не согласен. Есть риски: ошибки, безопасность, потеря человеческого контроля."
+${PERSONAS[p2].icon} ${PERSONAS[p2].name}: "Есть риски: ошибки, безопасность и зависимость от технологии."
 
-${PERSONAS[p1].icon} ${PERSONAS[p1].name}: "Контраргумент: при грамотной настройке AI усиливает человека, а не заменяет его."
+${PERSONAS[p1].icon} ${PERSONAS[p1].name}: "При правильной настройке AI усиливает человека."
 
-${PERSONAS[p2].icon} ${PERSONAS[p2].name}: "Вывод: лучший вариант — гибридный подход AI + эксперт."`;
-  $('debateResult').textContent=t;
+${PERSONAS[p2].icon} ${PERSONAS[p2].name}: "Значит, лучший вариант — гибридный подход."`;
   audit('chat','Создан дебат',topic.slice(0,60));
 }
 
@@ -1015,27 +1336,25 @@ function insertDebateToChat(){
   closeModal('mDebate');
   showSection('chat');
   appendMessage('bot',t);
-  audit('chat','Дебат вставлен в чат');
+  audit('chat','Дебат вставлен');
 }
 
-// =============================================
-// WEBHOOK
-// =============================================
 function renderWebhookDocs(){
   const base=location.origin;
-  $('webhookCode').textContent=`fetch('${base}/api/chat', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer YOUR_API_KEY' },
-  body: JSON.stringify({
-    messages: [{ role: 'user', content: 'Привет!' }]
-  })
-}).then(r => r.json()).then(data => console.log(data))`;
+  $('webhookCode').textContent =
+"fetch('"+base+"/api/chat', {\n"+
+"  method: 'POST',\n"+
+"  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer YOUR_API_KEY' },\n"+
+"  body: JSON.stringify({\n"+
+"    messages: [{ role: 'user', content: 'Привет!' }]\n"+
+"  })\n"+
+"}).then(r => r.json()).then(data => console.log(data))";
 
-  $('widgetCode').textContent=`<script src="${base}/widget.js"
-  data-brand="${STATE.brand.name}"
-  data-color="${STATE.brand.color}"
-  data-position="bottom-right">
-</script>`;
+  $('widgetCode').textContent =
+'<script src="'+base+'/widget.js" '+
+'data-brand="'+STATE.brand.name+'" '+
+'data-color="'+STATE.brand.color+'" '+
+'data-position="bottom-right"><'+'/script>';
 }
 
 function copyCode(id){
@@ -1044,50 +1363,39 @@ function copyCode(id){
   toast('Код скопирован 📋');
 }
 
-// =============================================
-// TELEGRAM
-// =============================================
 function generateTgCode(){
   const token=$('tgToken').value||'YOUR_BOT_TOKEN';
   const webhook=$('tgWebhook').value||'https://your-domain.vercel.app/api/telegram';
-  $('tgCode').textContent=`// api/telegram.js
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  const { message } = req.body;
-  const chatId = message?.chat?.id;
-  const text = message?.text;
-
-  if (!text) return res.status(200).json({ ok: true });
-
-  const aiResponse = await fetch('${location.origin}/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      messages: [{ role: 'user', content: text }]
-    })
-  }).then(r => r.json());
-
-  const reply = aiResponse?.choices?.[0]?.message?.content || 'Ошибка AI';
-
-  await fetch(\`https://api.telegram.org/bot${token}/sendMessage\`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: reply
-    })
-  });
-
-  res.status(200).json({ ok: true, webhook: '${webhook}' });
-}`;
+  $('tgCode').textContent =
+"// api/telegram.js\n"+
+"export default async function handler(req, res) {\n"+
+"  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });\n\n"+
+"  const { message } = req.body;\n"+
+"  const chatId = message?.chat?.id;\n"+
+"  const text = message?.text;\n\n"+
+"  if (!text) return res.status(200).json({ ok: true });\n\n"+
+"  const aiResponse = await fetch('"+location.origin+"/api/chat', {\n"+
+"    method: 'POST',\n"+
+"    headers: { 'Content-Type': 'application/json' },\n"+
+"    body: JSON.stringify({\n"+
+"      messages: [{ role: 'user', content: text }]\n"+
+"    })\n"+
+"  }).then(r => r.json());\n\n"+
+"  const reply = aiResponse?.choices?.[0]?.message?.content || 'Ошибка AI';\n\n"+
+"  await fetch(`https://api.telegram.org/bot"+token+"/sendMessage`, {\n"+
+"    method: 'POST',\n"+
+"    headers: { 'Content-Type': 'application/json' },\n"+
+"    body: JSON.stringify({\n"+
+"      chat_id: chatId,\n"+
+"      text: reply\n"+
+"    })\n"+
+"  });\n\n"+
+"  res.status(200).json({ ok: true, webhook: '"+webhook+"' });\n"+
+"}";
   toast('Telegram-код сгенерирован 📲');
   audit('settings','Генерация Telegram-кода');
 }
 
-// =============================================
-// SETTINGS
-// =============================================
 function saveSettings(){
   if(STATE.user){
     STATE.user.name=$('settingsName').value;
@@ -1099,12 +1407,9 @@ function saveSettings(){
   toast('Настройки сохранены ⚙️');
 }
 
-// =============================================
-// ANALYTICS
-// =============================================
 function renderDash(){
   updateKPIs();
-  const data1={
+  renderChart('dashChart1','line',{
     labels:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
     datasets:[{
       label:'Сообщения',
@@ -1114,51 +1419,36 @@ function renderDash(){
       fill:true,
       tension:0.3
     }]
-  };
-  const data2={
+  });
+  renderChart('dashChart2','bar',{
     labels:['Groq','OpenAI','Claude','Gemini','Local'],
     datasets:[{
       label:'Токены',
       data:[48,35,61,22,18],
       backgroundColor:['#3b82f6','#8b5cf6','#22c55e','#f59e0b','#f87171']
     }]
-  };
-  renderChart('dashChart1','line',data1);
-  renderChart('dashChart2','bar',data2);
+  });
 }
 
 function renderAnalyticsCharts(){
-  const d1={
+  renderChart('analyticsChart1','line',{
     labels:['Янв','Фев','Мар','Апр','Май'],
-    datasets:[{
-      label:'Активность',
-      data:[420,680,540,890,1240],
-      borderColor:'#3b82f6',
-      tension:0.3
-    }]
-  };
-  const d2={
+    datasets:[{label:'Активность',data:[420,680,540,890,1240],borderColor:'#3b82f6',tension:0.3}]
+  });
+  renderChart('analyticsChart2','doughnut',{
     labels:['LLaMA','GPT-4o','Claude','Gemini'],
-    datasets:[{
-      data:[45,30,15,10],
-      backgroundColor:['#3b82f6','#8b5cf6','#22c55e','#f59e0b']
-    }]
-  };
-  renderChart('analyticsChart1','line',d1);
-  renderChart('analyticsChart2','doughnut',d2);
+    datasets:[{data:[45,30,15,10],backgroundColor:['#3b82f6','#8b5cf6','#22c55e','#f59e0b']}]
+  });
 }
 
 function updateKPIs(){
   if($('kpiMsg')) $('kpiMsg').textContent=STATE.totalMessages;
-  if($('kpiTok')) $('kpiTok').textContent=STATE.totalTokens.toLocaleString('ru');
+  if($('kpiTok')) $('kpiTok').textContent=STATE.totalTokens.toLocaleString('ru-RU');
   if($('kpiVotes')) $('kpiVotes').textContent=STATE.votes.up+STATE.votes.down;
-  if($('tokenCounter')) $('tokenCounter').textContent=STATE.totalTokens.toLocaleString('ru');
+  if($('tokenCounter')) $('tokenCounter').textContent=STATE.totalTokens.toLocaleString('ru-RU');
   if($('kpiOrgs')) $('kpiOrgs').textContent=STATE.tenants.length;
 }
 
-// =============================================
-// MODAL
-// =============================================
 function openModal(id){
   const m=$(id);
   if(m) m.classList.add('open');
@@ -1169,16 +1459,13 @@ function closeModal(id){
   if(m) m.classList.remove('open');
 }
 
-// =============================================
-// CHART
-// =============================================
 function renderChart(id,type,data){
-  if(charts[id]) charts[id].destroy();
   const canvas=$(id);
   if(!canvas) return;
+  if(charts[id]) charts[id].destroy();
   charts[id]=new Chart(canvas,{
-    type,
-    data,
+    type:type,
+    data:data,
     options:{
       responsive:true,
       maintainAspectRatio:true,
@@ -1187,9 +1474,6 @@ function renderChart(id,type,data){
   });
 }
 
-// =============================================
-// PRICING
-// =============================================
 function setPlan(plan){
   STATE.currentPlan=plan;
   updateUsageDashboard();
@@ -1198,14 +1482,11 @@ function setPlan(plan){
   toast('План изменён на '+PLANS[plan].name+' ✅');
 }
 
-// =============================================
-// INIT
-// =============================================
 window.onload=function(){
-  const savedUsage=localStorage.getItem('nai_usage');
+  const savedUsage=safeGet('nai_usage');
   if(savedUsage) STATE.usage=JSON.parse(savedUsage);
 
-  const savedTheme=localStorage.getItem('nai_theme');
+  const savedTheme=safeGet('nai_theme');
   if(savedTheme==='light'){
     document.body.classList.add('light-theme');
     if($('themeIcon')) $('themeIcon').textContent='🌙';
