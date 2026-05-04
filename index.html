@@ -8,8 +8,69 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+/* ✨ ДОБАВИТЬ В САМОЕ НАЧАЛО ✨ */
+/* CSS переменные для тем */
+:root {
+  --bg: #f9fafb;
+  --card: #ffffff;
+  --text: #111827;
+  --border: #e5e7eb;
+}
+
+body.dark-theme {
+  --bg: #111827;
+  --card: #1f2937;
+  --text: #f9fafb;
+  --border: #374151;
+}
+
+body { 
+  background: var(--bg); 
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}
+
+.card, .modal-content, .kpi-card, .chart-mini { 
+  background: var(--card); 
+  border-color: var(--border); 
+}
+
+/* Селектор моделей */
+.model-selector {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+
+.model-selector select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.model-selector select:hover {
+  border-color: var(--accent);
+}
+
+.model-info {
+  font-size: 13px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+/* ✨ КОНЕЦ ВСТАВКИ ✨ */
+
+/* Дальше идут ваши существующие стили */
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0b1020;--surface:#12192b;--surface-2:#192235;--border:rgba(255,255,255,.08);--text:#edf2ff;--text-2:#a6b0c3;--text-3:#667085;--accent:#3b82f6;--accent-2:#8b5cf6;--success:#22c55e;--danger:#f87171;--warn:#f59e0b}
+:root{--bg:#0b1020;--surface:#12192b;--surface-2:#192235;...
 body{font-family:Inter,sans-serif;background:linear-gradient(180deg,var(--bg),#060a14);color:var(--text);line-height:1.5}
 .page{display:none;min-height:100vh}.page.active{display:flex;flex-direction:column}
 .btn{padding:10px 16px;border-radius:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:.2s;display:inline-flex;align-items:center;gap:6px}
@@ -349,6 +410,21 @@ textarea.form-input{resize:vertical;min-height:80px}
           <div style="display:grid;grid-template-columns:1fr 280px;height:calc(100vh - 220px)">
             <div style="display:flex;flex-direction:column">
               <div class="messages" id="messages"></div>
+              <!-- После файлов, перед input-zone -->
+<div class="model-selector">
+  <select id="providerSelect" onchange="updateModels()">
+    <option value="groq">Groq (быстро)</option>
+    <option value="openai">OpenAI (качество)</option>
+    <option value="anthropic">Anthropic</option>
+    <option value="gemini">Google Gemini</option>
+  </select>
+  
+  <select id="modelSelect" onchange="onModelChange()">
+    <!-- заполняется JS -->
+  </select>
+  
+  <span class="model-info">⚡ fast | 💰 low</span>
+</div>
               <div class="input-zone">
                 <div class="quick-chips" id="quickChips"></div>
                 <div style="display:flex;gap:8px">
@@ -677,15 +753,7 @@ function onModelChange() {
   const model = MODELS[STATE.selectedProvider].find(m => m.id === modelId);
   document.querySelector('.model-info').textContent = `⚡ ${model.speed} | 💰 ${model.cost}`;
 }
-  function onModelChange() {
-  const modelId = document.getElementById('modelSelect').value;
-  STATE.selectedModel = modelId;
-  
-  const model = MODELS[STATE.selectedProvider].find(m => m.id === modelId);
-  document.querySelector('.model-info').textContent = `⚡ ${model.speed} | 💰 ${model.cost}`;
-}
 
-// ✨ ДОБАВИТЬ СЮДА ✨
 function toggleTheme() {
   const isDark = document.body.classList.toggle('dark-theme');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
