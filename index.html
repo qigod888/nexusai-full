@@ -8,7 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-/* ✨ ДОБАВИТЬ В САМОЕ НАЧАЛО ✨ */
 /* CSS переменные для тем */
 :root {
   --bg: #f9fafb;
@@ -66,11 +65,8 @@ body {
   white-space: nowrap;
 }
 
-/* ✨ КОНЕЦ ВСТАВКИ ✨ */
-
-/* Дальше идут ваши существующие стили */
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0b1020;--surface:#12192b;--surface-2:#192235;...
+:root{--bg:#0b1020;--surface:#12192b;--surface-2:#192235;--border:rgba(255,255,255,.08);--text:#edf2ff;--text-2:#a6b0c3;--text-3:#667085;--accent:#3b82f6;--accent-2:#8b5cf6;--success:#22c55e;--danger:#f87171;--warn:#f59e0b}
 body{font-family:Inter,sans-serif;background:linear-gradient(180deg,var(--bg),#060a14);color:var(--text);line-height:1.5}
 .page{display:none;min-height:100vh}.page.active{display:flex;flex-direction:column}
 .btn{padding:10px 16px;border-radius:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:.2s;display:inline-flex;align-items:center;gap:6px}
@@ -158,48 +154,13 @@ textarea.form-input{resize:vertical;min-height:80px}
 .bot-mouth{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);width:28px;height:12px;border-radius:0 0 18px 18px;background:linear-gradient(180deg,#f07c7c,#ca2f2f)}
 .bot-torso{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:100px;height:72px;border-radius:54px 54px 0 0;background:linear-gradient(160deg,var(--accent),var(--accent-2))}
 @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-.analytics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
-}
-
-.kpi-card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-}
-
-.kpi-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #111;
-}
-
-.kpi-label {
-  font-size: 14px;
-  color: #6b7280;
-  margin-top: 4px;
-}
-
-.kpi-change {
-  font-size: 13px;
-  color: #10b981;
-  margin-top: 8px;
-}
-
-.kpi-change.warn { color: #ef4444; }
-
-.chart-mini {
-  background: #fff;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  grid-column: span 2;
-}
+.analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;max-height:calc(100vh - 200px);overflow-y:auto}
+.kpi-card{background:#fff;padding:20px;border-radius:12px;border:1px solid #e5e7eb}
+.kpi-value{font-size:32px;font-weight:700;color:#111}
+.kpi-label{font-size:14px;color:#6b7280;margin-top:4px}
+.kpi-change{font-size:13px;color:#10b981;margin-top:8px}
+.kpi-change.warn{color:#ef4444}
+.chart-mini{background:#fff;padding:16px;border-radius:12px;border:1px solid #e5e7eb;grid-column:span 2}
 </style>
 </head>
 <body>
@@ -289,7 +250,7 @@ textarea.form-input{resize:vertical;min-height:80px}
   <div class="topnav">
     <div class="brand"><div class="logo">N</div>NexusAI v3</div>
     <div style="display:flex;gap:10px">
-      <button class="btn" onclick="nav('login')">Войти</button>
+      <button class="btn" onclick="navTo('login')">Войти</button>
       <button class="btn btn-primary" onclick="demoLogin()">🚀 Демо</button>
     </div>
   </div>
@@ -318,6 +279,7 @@ textarea.form-input{resize:vertical;min-height:80px}
     </div>
   </div>
 </div>
+
 <!-- APP -->
 <div class="page" id="page-app">
   <div class="app">
@@ -336,22 +298,16 @@ textarea.form-input{resize:vertical;min-height:80px}
       <div class="nav-item" onclick="showSection('telegram')">📲 Telegram</div>
       <div class="nav-item" onclick="showSection('settings')">⚙️ Настройки</div>
       <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--border)">
-  
-  <!-- ✨ ДОБАВИТЬ ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ✨ -->
-  <div class="theme-toggle" onclick="toggleTheme()" 
-       style="display:flex;align-items:center;gap:8px;padding:12px;
-              cursor:pointer;border-radius:10px;margin-bottom:10px;
-              background:var(--surface-2)">
-    <span id="themeIcon" style="font-size:20px">🌙</span>
-    <span style="font-size:14px;font-weight:600">Сменить тему</span>
-  </div>
-  
-  <div style="padding:12px;background:var(--surface-2);border-radius:10px;margin-bottom:10px">
-    <div style="font-weight:700;font-size:14px" id="userName">Demo User</div>
-    <div style="font-size:12px;color:var(--text-2)" id="userPlan">Business</div>
-  </div>
-  <button class="btn" style="width:100%" onclick="doLogout()">↩ Выйти</button>
-</div>
+        <div class="theme-toggle" onclick="toggleTheme()" style="display:flex;align-items:center;gap:8px;padding:12px;cursor:pointer;border-radius:10px;margin-bottom:10px;background:var(--surface-2)">
+          <span id="themeIcon" style="font-size:20px">🌙</span>
+          <span style="font-size:14px;font-weight:600">Сменить тему</span>
+        </div>
+        <div style="padding:12px;background:var(--surface-2);border-radius:10px;margin-bottom:10px">
+          <div style="font-weight:700;font-size:14px" id="userName">Demo User</div>
+          <div style="font-size:12px;color:var(--text-2)" id="userPlan">Business</div>
+        </div>
+        <button class="btn" style="width:100%" onclick="doLogout()">↩ Выйти</button>
+      </div>
     </div>
 
     <!-- MAIN CONTENT -->
@@ -410,21 +366,23 @@ textarea.form-input{resize:vertical;min-height:80px}
           <div style="display:grid;grid-template-columns:1fr 280px;height:calc(100vh - 220px)">
             <div style="display:flex;flex-direction:column">
               <div class="messages" id="messages"></div>
-              <!-- После файлов, перед input-zone -->
-<div class="model-selector">
-  <select id="providerSelect" onchange="updateModels()">
-    <option value="groq">Groq (быстро)</option>
-    <option value="openai">OpenAI (качество)</option>
-    <option value="anthropic">Anthropic</option>
-    <option value="gemini">Google Gemini</option>
-  </select>
-  
-  <select id="modelSelect" onchange="onModelChange()">
-    <!-- заполняется JS -->
-  </select>
-  
-  <span class="model-info">⚡ fast | 💰 low</span>
-</div>
+              
+              <!-- Селектор моделей -->
+              <div class="model-selector">
+                <select id="providerSelect" onchange="updateModels()">
+                  <option value="groq">Groq (быстро)</option>
+                  <option value="openai">OpenAI (качество)</option>
+                  <option value="anthropic">Anthropic</option>
+                  <option value="gemini">Google Gemini</option>
+                </select>
+                
+                <select id="modelSelect" onchange="onModelChange()">
+                  <!-- заполняется JS -->
+                </select>
+                
+                <span class="model-info">⚡ fast | 💰 low</span>
+              </div>
+              
               <div class="input-zone">
                 <div class="quick-chips" id="quickChips"></div>
                 <div style="display:flex;gap:8px">
@@ -468,13 +426,14 @@ textarea.form-input{resize:vertical;min-height:80px}
           </div>
         </div>
 
-        <!-- ANALYTICS -->
+        <!-- Остальные секции (Analytics, Brand, Memory, API, Telegram, Settings) продолжение в следующем сообщении -->
+                <!-- ANALYTICS -->
         <div id="section-analytics" style="display:none">
           <div class="grid">
-            <div class="card"><h4 style="margin-bottom:12px">Активность по неделям</h4><canvas id="analyticsChart1"></canvas></div>
-            <div class="card"><h4 style="margin-bottom:12px">Токены по дням</h4><canvas id="analyticsChart2"></canvas></div>
+            <div class="card"><h4 style="margin-bottom:12px">📊 Активность</h4><canvas id="analyticsChart1"></canvas></div>
+            <div class="card"><h4 style="margin-bottom:12px">💬 Модели</h4><canvas id="analyticsChart2"></canvas></div>
           </div>
-          <div class="card" style="margin-top:16px"><h4 style="margin-bottom:12px">История сессий</h4><table style="width:100%;border-collapse:collapse" id="analyticsTable"></table></div>
+          <div class="card" style="margin-top:16px"><h4 style="margin-bottom:12px">📈 Таблица</h4><table style="width:100%;border-collapse:collapse" id="analyticsTable"></table></div>
         </div>
 
         <!-- BRAND -->
@@ -484,14 +443,14 @@ textarea.form-input{resize:vertical;min-height:80px}
               <h3 style="margin-bottom:16px">White Label</h3>
               <div style="margin-bottom:12px">
                 <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">Название</label>
-                <input class="form-input" id="brandName" placeholder="Ваш бренд">
+                <input class="form-input" id="brandName" placeholder="Ваша компания">
               </div>
               <div style="margin-bottom:12px">
                 <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">Домен</label>
                 <input class="form-input" id="brandDomain" placeholder="yourbrand.ru">
               </div>
               <div style="margin-bottom:12px">
-                <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">Логотип (символ)</label>
+                <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">Логотип (emoji)</label>
                 <input class="form-input" id="brandLogo" maxlength="2" placeholder="N">
               </div>
               <div style="margin-bottom:16px">
@@ -510,7 +469,7 @@ textarea.form-input{resize:vertical;min-height:80px}
                     <div id="previewDomain" style="font-size:12px;color:var(--text-2)">nexusai.ru</div>
                   </div>
                 </div>
-                <p style="font-size:14px;color:var(--text-2)">Так клиент увидит ваш бренд</p>
+                <p style="font-size:14px;color:var(--text-2)">Так будет выглядеть ваш брендированный чат</p>
               </div>
             </div>
           </div>
@@ -520,12 +479,12 @@ textarea.form-input{resize:vertical;min-height:80px}
         <div id="section-memory" style="display:none">
           <div class="grid">
             <div class="card">
-              <h3 style="margin-bottom:16px">Добавить в память</h3>
-              <input class="form-input" id="memoryInput" placeholder="Например: Я работаю в Краснодаре, ИП на УСН" style="margin-bottom:12px">
-              <button class="btn btn-primary" onclick="saveMemory()">💾 Сохранить</button>
+              <h3 style="margin-bottom:16px">➕ Добавить факт</h3>
+              <input class="form-input" id="memoryInput" placeholder="Например, я люблю кофе" style="margin-bottom:12px">
+              <button class="btn btn-primary" onclick="saveMemory()">Сохранить</button>
             </div>
             <div class="card">
-              <h3 style="margin-bottom:16px">Сохранённые факты</h3>
+              <h3 style="margin-bottom:16px">🧠 База знаний</h3>
               <div id="memoryList"></div>
             </div>
           </div>
@@ -536,13 +495,13 @@ textarea.form-input{resize:vertical;min-height:80px}
           <div class="grid">
             <div class="card">
               <h3 style="margin-bottom:12px">Webhook API</h3>
-              <p style="color:var(--text-2);margin-bottom:12px;font-size:14px">Интегрируйте чат в ваше приложение</p>
-              <button class="btn btn-primary" onclick="openModal('webhookModal');renderWebhookDocs()">Открыть документацию</button>
+              <p style="color:var(--text-2);margin-bottom:12px;font-size:14px">Интегрируйте AI в свои приложения</p>
+              <button class="btn btn-primary" onclick="openModal('webhookModal');renderWebhookDocs()">Показать документацию</button>
             </div>
             <div class="card">
               <h3 style="margin-bottom:12px">Встраиваемый виджет</h3>
-              <p style="color:var(--text-2);margin-bottom:12px;font-size:14px">Вставьте на любой сайт одним тегом</p>
-              <button class="btn" onclick="openModal('webhookModal');renderWebhookDocs()">Показать код</button>
+              <p style="color:var(--text-2);margin-bottom:12px;font-size:14px">Добавьте чат на любой сайт одной строкой</p>
+              <button class="btn" onclick="openModal('webhookModal');renderWebhookDocs()">Получить код</button>
             </div>
           </div>
         </div>
@@ -563,8 +522,8 @@ textarea.form-input{resize:vertical;min-height:80px}
               <button class="btn btn-primary" onclick="generateTgCode()">Сгенерировать код</button>
             </div>
             <div class="card">
-              <h3 style="margin-bottom:12px">Server-код</h3>
-              <div class="codebox" id="tgCode" style="max-height:400px;white-space:pre-wrap">Нажмите "Сгенерировать" →</div>
+              <h3 style="margin-bottom:12px">Server-side код</h3>
+              <div class="codebox" id="tgCode" style="max-height:400px;white-space:pre-wrap">Заполните поля слева</div>
             </div>
           </div>
         </div>
@@ -583,58 +542,42 @@ textarea.form-input{resize:vertical;min-height:80px}
                 <input class="form-input" id="settingsEmail">
               </div>
               <div style="margin-bottom:16px">
-                <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">Кастомный промпт</label>
-                <textarea class="form-input" id="customPrompt" placeholder="Дополнительные инструкции для AI..."></textarea>
+                <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">Кастомный системный промпт</label>
+                <textarea class="form-input" id="customPrompt" placeholder="Например: Всегда говори кратко и по делу"></textarea>
               </div>
               <button class="btn btn-primary" onclick="saveSettings()">Сохранить</button>
-          </div>
-<div class="card">
-  <h3 style="margin-bottom:16px">⚙️ Персонализация</h3>
-  
-  <div style="margin-bottom:12px">
-    <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">
-      Системный промпт (необязательно)
-    </label>
-    <textarea 
-      class="form-input" 
-      id="customPrompt" 
-      rows="3" 
-      placeholder="Дополнительные инструкции для AI...">
-    </textarea>
-  </div>
-  
-  <div style="margin-bottom:12px">
-    <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">
-      Язык интерфейса
-    </label>
-    <select class="form-input" id="langSelect">
-      <option value="ru">🇷🇺 Русский</option>
-      <option value="en">🇬🇧 English</option>
-    </select>
-  </div>
-  
-  <div style="margin-bottom:12px">
-    <label style="display:flex;align-items:center;cursor:pointer">
-      <input type="checkbox" id="soundToggle" style="margin-right:8px">
-      <span style="font-size:14px">🔊 Звуковые уведомления</span>
-    </label>
-  </div>
-  
-  <p style="font-size:12px;color:var(--text-2);margin-top:8px">
-    ✨ Настройки сохраняются автоматически
-  </p>
-</div>
+            </div>
+            <div class="card">
+              <h3 style="margin-bottom:16px">Предпочтения</h3>
+              <div style="margin-bottom:12px">
+                <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">Язык</label>
+                <textarea class="form-input" id="customPrompt" rows="3" placeholder="Дополнительные инструкции для AI..."></textarea>
+              </div>
+              <div style="margin-bottom:12px">
+                <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">Язык интерфейса</label>
+                <select class="form-input" id="langSelect">
+                  <option value="ru">Русский</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div style="margin-bottom:12px">
+                <label style="display:flex;align-items:center;cursor:pointer">
+                  <input type="checkbox" id="soundToggle" style="margin-right:8px">
+                  <span style="font-size:14px">Звуковые уведомления</span>
+                </label>
+              </div>
+              <p style="font-size:12px;color:var(--text-2);margin-top:8px">Настройки автоматически сохраняются</p>
+            </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </div>
+
 <script>
-// STATE — единый объект
+// ========== STATE ==========
 const STATE = {
-  // Существующие поля
   user: null,
   section: 'dashboard',
   persona: 'coder',
@@ -643,25 +586,18 @@ const STATE = {
   totalMessages: 0,
   votes: { up: 0, down: 0 },
   files: [],
-  memory: ['Я нейрокодер из провинции', 'Моя задача - миллиард на AI'],
+  memory: ['Пользователь любит подробные объяснения', 'Работает в сфере AI'],
   team: [
     { email: 'owner@nexusai.ru', role: 'Admin' },
     { email: 'manager@nexusai.ru', role: 'Editor' }
   ],
-  brand: {
-    name: 'NexusAI',
-    domain: 'nexusai.ru',
-    logo: 'N',
-    color: '#3b82f6'
-  },
+  brand: { name: 'NexusAI', domain: 'nexusai.ru', logo: 'N', color: '#3b82f6' },
   settings: { customPrompt: '' },
-  
-  // ✨ НОВЫЕ поля для выбора моделей
   selectedModel: 'llama-3.3-70b-versatile',
   selectedProvider: 'groq'
 };
 
-// MODELS — отдельный объект (не внутри STATE)
+// ========== MODELS ==========
 const MODELS = {
   groq: [
     { id: 'llama-3.3-70b-versatile', name: 'LLaMA 3.3 70B', speed: 'fast', cost: 'low' },
@@ -680,54 +616,129 @@ const MODELS = {
     { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', speed: 'ultra', cost: 'low' }
   ]
 };
+
+// ========== PERSONAS ==========
 const PERSONAS = {
   helper: {
     name: 'Помощник',
     icon: '🤖',
     system: 'Ты умный AI-помощник. Отвечай чётко, по делу, без лишней воды.',
-    greeting: 'Привет! Чем могу помочь?'
+    greeting: 'Привет! Чем могу помочь?',
+    chips: ['Объясни простыми словами', 'Как это работает?', 'Дай совет'],
+    templates: [
+      { title: 'Краткий ответ', text: 'Ответь кратко и по сути на вопрос:' },
+      { title: 'Пошаговый план', text: 'Составь пошаговый план для:' }
+    ]
   },
   expert: {
     name: 'Эксперт',
     icon: '🎓',
     system: 'Ты эксперт в своей области. Давай подробные, профессиональные ответы с примерами.',
-    greeting: 'Здравствуйте! Готов дать экспертную консультацию.'
+    greeting: 'Здравствуйте! Готов дать экспертную консультацию.',
+    chips: ['Подробный анализ', 'Сравни варианты', 'Риски и выгоды'],
+    templates: [
+      { title: 'Экспертное мнение', text: 'Дай профессиональное мнение о:' },
+      { title: 'Анализ', text: 'Проанализируй с точки зрения эксперта:' }
+    ]
   },
   creative: {
     name: 'Креативщик',
     icon: '🎨',
     system: 'Ты креативный помощник. Генерируй оригинальные идеи, используй метафоры и яркие образы.',
-    greeting: 'Привет! Давай создадим что-то крутое!'
+    greeting: 'Привет! Давай создадим что-то крутое!',
+    chips: ['Придумай идею', 'Брейнстормим!', 'Необычный подход'],
+    templates: [
+      { title: 'Креативная идея', text: 'Придумай креативное решение для:' },
+      { title: 'Метафора', text: 'Объясни через метафору:' }
+    ]
   },
   coder: {
     name: 'Программист',
     icon: '💻',
     system: 'Ты опытный программист. Пиши чистый код с комментариями, объясняй решения.',
-    greeting: 'Привет! Готов помочь с кодом.'
+    greeting: 'Привет! Готов помочь с кодом.',
+    chips: ['Напиши функцию', 'Исправь баг', 'Оптимизируй код'],
+    templates: [
+      { title: 'Функция', text: 'Напиши функцию на JavaScript для:' },
+      { title: 'Дебаг', text: 'Найди и исправь ошибку в коде:' }
+    ]
   },
   analyst: {
     name: 'Аналитик',
     icon: '📊',
     system: 'Ты аналитик данных. Структурируй информацию, выделяй паттерны, делай выводы.',
-    greeting: 'Здравствуйте! Помогу проанализировать данные.'
+    greeting: 'Здравствуйте! Помогу проанализировать данные.',
+    chips: ['Проанализируй данные', 'Найди закономерность', 'Сделай выводы'],
+    templates: [
+      { title: 'Анализ данных', text: 'Проанализируй следующие данные:' },
+      { title: 'Выводы', text: 'Какие выводы можно сделать из:' }
+    ]
   },
   teacher: {
     name: 'Учитель',
     icon: '📚',
     system: 'Ты опытный преподаватель. Объясняй простым языком, используй примеры и аналогии.',
-    greeting: 'Привет! Чему сегодня будем учиться?'
+    greeting: 'Привет! Чему сегодня будем учиться?',
+    chips: ['Объясни как 5-летнему', 'Покажи пример', 'Пошагово обучи'],
+    templates: [
+      { title: 'Объяснение', text: 'Объясни простым языком что такое:' },
+      { title: 'Урок', text: 'Научи меня шаг за шагом:' }
+    ]
   }
 };
-// Функция обновления списка моделей при смене провайдера
+
+// ========== UTILS ==========
+function $(id) { return document.getElementById(id); }
+function now() { return new Date().toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'}); }
+function toast(msg, type='success') {
+  const w = $('toastWrap'), t = document.createElement('div');
+  t.className = 'toast ' + (type==='error'?'error':type==='warn'?'warn':'');
+  t.textContent = msg;
+  w.appendChild(t);
+  setTimeout(() => {t.style.opacity=0;t.style.transform='translateY(10px)';setTimeout(()=>t.remove(),300)}, 3000);
+}
+
+// ========== NAVIGATION ==========
+function navTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $('page-'+page).classList.add('active');
+}
+
+// ========== AUTH ==========
+function demoLogin() {
+  $('loginEmail').value = 'demo@nexusai.ru';
+  $('loginPwd').value = 'demo123';
+  doLogin();
+}
+
+function doLogin() {
+  const email = $('loginEmail').value, pwd = $('loginPwd').value;
+  if (!email || !pwd) return toast('Заполните все поля', 'error');
+  
+  STATE.user = { name: 'Demo User', email, plan: 'Business' };
+  $('userName').textContent = STATE.user.name;
+  $('userPlan').textContent = STATE.user.plan;
+  $('settingsName').value = STATE.user.name;
+  $('settingsEmail').value = STATE.user.email;
+  
+  navTo('app');
+  showSection('dashboard');
+  toast('Добро пожаловать!');
+}
+
+function doLogout() {
+  STATE.user = null;
+  STATE.messages = [];
+  navTo('landing');
+}
+
+// ========== MODELS ==========
 function updateModels() {
-  const provider = document.getElementById('providerSelect').value;
-  const modelSelect = document.getElementById('modelSelect');
+  const provider = $('providerSelect').value;
+  const modelSelect = $('modelSelect');
   const modelInfo = document.querySelector('.model-info');
   
-  // Очистить старые опции
   modelSelect.innerHTML = '';
-  
-  // Добавить модели выбранного провайдера
   MODELS[provider].forEach(model => {
     const option = document.createElement('option');
     option.value = model.id;
@@ -735,21 +746,17 @@ function updateModels() {
     modelSelect.appendChild(option);
   });
   
-  // Обновить STATE
   STATE.selectedProvider = provider;
   STATE.selectedModel = MODELS[provider][0].id;
   
-  // Показать характеристики первой модели
   const firstModel = MODELS[provider][0];
   modelInfo.textContent = `⚡ ${firstModel.speed} | 💰 ${firstModel.cost}`;
 }
 
-// При смене модели в селекторе
 function onModelChange() {
-  const modelId = document.getElementById('modelSelect').value;
+  const modelId = $('modelSelect').value;
   STATE.selectedModel = modelId;
   
-  // Найти инфо о модели
   const model = MODELS[STATE.selectedProvider].find(m => m.id === modelId);
   document.querySelector('.model-info').textContent = `⚡ ${model.speed} | 💰 ${model.cost}`;
 }
@@ -757,177 +764,504 @@ function onModelChange() {
 function toggleTheme() {
   const isDark = document.body.classList.toggle('dark-theme');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
+  $('themeIcon').textContent = isDark ? '☀️' : '🌙';
 }
 
-let charts={};  // ← эта строка у вас уже есть
-let charts={};
+let charts = {};
 
-// UTILS
-function $(id){return document.getElementById(id)}
-function now(){return new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})}
-function toast(msg,type='success'){const w=$('toastWrap'),t=document.createElement('div');t.className='toast '+(type==='error'?'error':type==='warn'?'warn':'');t.textContent=msg;w.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(10px)';setTimeout(()=>t.remove(),300)},3000)}
-function nav(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$('page-'+page).classList.add('active')}
+// ========== SECTIONS ==========
+function showSection(s) {
+  STATE.section = s;
+  document.querySelectorAll('[id^=section-]').forEach(x => x.style.display = 'none');
+  $('section-'+s).style.display = 'block';
+  
+  document.querySelectorAll('.nav-item').forEach((n,i) => 
+    n.classList.toggle('active', ['dashboard','chat','analytics','brand','memory','api','telegram','settings'][i] === s)
+  );
+  
+  const titles = {dashboard:'Дашборд', chat:'AI Чат', analytics:'Аналитика', brand:'White Label', memory:'Память', api:'Webhook API', telegram:'Telegram-бот', settings:'Настройки'};
+  $('toolbarTitle').textContent = titles[s] || s;
+  
+  if (s === 'chat') {
+    renderPersonaBar();
+    renderQuickChips();
+    if (STATE.messages.length === 0) {
+      appendMessage('bot', `${PERSONAS[STATE.persona].greeting} Меня зовут ${PERSONAS[STATE.persona].name}. Чем помочь?`);
+    }
+  }
+  if (s === 'dashboard') renderDash();
+  if (s === 'analytics') renderAnalytics();
+  if (s === 'memory') renderMemory();
+  if (s === 'brand') updateBrandPreview();
+}
 
-// AUTH
-function doLogin(){const email=$('loginEmail').value,pwd=$('loginPwd').value;if(!email||!pwd)return toast('Заполните все поля','error');STATE.user={name:'Иван Иванов',email,plan:'Business'};$('userName').textContent=STATE.user.name;$('userPlan').textContent=STATE.user.plan;$('settingsName').value=STATE.user.name;$('settingsEmail').value=STATE.user.email;nav('app');showSection('dashboard');toast('Добро пожаловать!')}
-function demoLogin(){$('loginEmail').value='demo@nexusai.ru';$('loginPwd').value='demo123';doLogin()}
-function doLogout(){STATE.user=null;STATE.messages=[];nav('landing')}
+// ========== PERSONA ==========
+function renderPersonaBar() {
+  const bar = $('personaBar');
+  if (!bar) return;
+  bar.innerHTML = '';
+  Object.entries(PERSONAS).forEach(([k, p]) => {
+    const b = document.createElement('button');
+    b.className = 'persona-chip' + (STATE.persona === k ? ' active' : '');
+    b.textContent = p.icon + ' ' + p.name;
+    b.onclick = () => { STATE.persona = k; renderPersonaBar(); renderQuickChips(); $('avatarPersona').textContent = p.name; };
+    bar.appendChild(b);
+  });
+}
 
-// NAVIGATION
-function showSection(s){STATE.section=s;document.querySelectorAll('[id^="section-"]').forEach(x=>x.style.display='none');$('section-'+s).style.display='block';document.querySelectorAll('.nav-item').forEach((n,i)=>n.classList.toggle('active',['dashboard','chat','analytics','brand','memory','api','telegram','settings'][i]===s));const titles={dashboard:'Дашборд',chat:'AI Чат',analytics:'Аналитика',brand:'White Label',memory:'Память персонажа',api:'Webhook API',telegram:'Telegram-бот',settings:'Настройки'};$('toolbarTitle').textContent=titles[s]||s;if(s==='chat'){renderPersonaBar();renderQuickChips();if(STATE.messages.length===0)appendMessage('bot',`Привет! Я ${PERSONAS[STATE.persona].name}. Задавайте вопросы — я буду уточнять детали перед ответом.`)}if(s==='dashboard')renderDash();if(s==='analytics')renderAnalytics();if(s==='memory')renderMemory();if(s==='brand')updateBrandPreview()}
+function renderQuickChips() {
+  const row = $('quickChips');
+  if (!row) return;
+  row.innerHTML = '';
+  
+  const chips = PERSONAS[STATE.persona].chips || ['Привет!', 'Расскажи о себе', 'Помоги с задачей'];
+  
+  chips.forEach(t => {
+    const c = document.createElement('button');
+    c.className = 'chip';
+    c.textContent = t;
+    c.onclick = () => { $('chatInput').value = t; $('chatInput').focus(); };
+    row.appendChild(c);
+  });
+}
 
-// PERSONA
-function renderPersonaBar(){const bar=$('personaBar');if(!bar)return;bar.innerHTML='';Object.entries(PERSONAS).forEach(([k,p])=>{const b=document.createElement('button');b.className='persona-chip'+(STATE.persona===k?' active':'');b.textContent=`${p.icon} ${p.name}`;b.onclick=()=>{STATE.persona=k;renderPersonaBar();renderQuickChips();$('avatarPersona').textContent=p.name};bar.appendChild(b)})}
+// ========== CHAT ==========
+function appendMessage(role, text, voteIdx) {
+  const box = $('messages');
+  const idx = STATE.messages.length;
+  const m = document.createElement('div');
+  m.className = 'msg ' + role;
+  m.innerHTML = `
+    <div class="avatar">${role === 'bot' ? PERSONAS[STATE.persona].icon : 'U'}</div>
+    <div class="bubble-wrap">
+      <div class="meta">${role === 'bot' ? 'AI' : 'Вы'} · ${now()}</div>
+      <div class="bubble" id="bubble-${idx}">${text}</div>
+      ${role === 'bot' ? `<div class="msg-actions">
+        <button class="vote-btn" onclick="vote(${idx},'up',this)">👍</button>
+        <button class="vote-btn" onclick="vote(${idx},'down',this)">👎</button>
+        <button class="vote-btn" onclick="speak(${idx})">🔊</button>
+      </div>` : ''}
+    </div>
+  `;
+  box.appendChild(m);
+  box.scrollTop = box.scrollHeight;
+  STATE.messages.push({ role, text, vote: null });
+  return idx;
+}
 
-function renderQuickChips(){const row=$('quickChips');if(!row)return;row.innerHTML='';PERSONAS[STATE.persona].chips.forEach(t=>{const c=document.createElement('button');c.className='chip';c.textContent=t;c.onclick=()=>{$('chatInput').value=t;$('chatInput').focus()};row.appendChild(c)})}
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
 
-// CHAT
-function appendMessage(role,text,voteIdx){const box=$('messages');const idx=STATE.messages.length;const m=document.createElement('div');m.className='msg '+role;m.innerHTML=`<div class="avatar">${role==='bot'?PERSONAS[STATE.persona].icon:'U'}</div><div class="bubble-wrap"><div class="meta">${role==='bot'?'AI':'Вы'} · ${now()}</div><div class="bubble" id="bubble-${idx}">${text}</div>${role==='bot'?`<div class="msg-actions"><button class="vote-btn" onclick="vote(${idx},'up',this)">👍</button><button class="vote-btn" onclick="vote(${idx},'down',this)">👎</button><button class="vote-btn" onclick="speak(${idx})">🔊</button></div>`:''}</div>`;box.appendChild(m);box.scrollTop=box.scrollHeight;STATE.messages.push({role,text,vote:null});return idx}
+async function sendMessage() {
+  const input = $('chatInput'), text = input.value.trim();
+  if (!text) return;
+  
+  appendMessage('user', text);
+  STATE.totalMessages++;
+  input.value = '';
+  
+  const idx = appendMessage('bot', '');
+  streamText(idx, 'Думаю...');
+  
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: PERSONAS[STATE.persona].system + (STATE.memory.length ? '\n\nКонтекст: ' + STATE.memory.join('. ') : '') + (STATE.settings.customPrompt ? '\n\n' + STATE.settings.customPrompt : '') },
+          { role: 'user', content: text }
+        ]
+      })
+    });
+    const d = await r.json();
+    const reply = d?.choices?.[0]?.message?.content || '⚠️ Ошибка API';
+    STATE.totalTokens += d?.usage?.total_tokens || Math.round(reply.length / 1.5);
+    streamText(idx, reply);
+  } catch (e) {
+    streamText(idx, '❌ Ошибка подключения. Проверьте GROQ_API_KEY в ENV');
+  }
+  updateKPIs();
+}
 
-function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}}
+function streamText(idx, text) {
+  const el = $('bubble-'+idx);
+  let i = 0;
+  const timer = setInterval(() => {
+    i += Math.ceil(Math.random() * 5);
+    el.textContent = text.slice(0, i);
+    $('messages').scrollTop = $('messages').scrollHeight;
+    if (i >= text.length) {
+      clearInterval(timer);
+      STATE.messages[idx].text = text;
+      updateKPIs();
+    }
+  }, 20);
+}
 
-async function sendMessage(){const input=$('chatInput'),text=input.value.trim();if(!text)return;appendMessage('user',text);STATE.totalMessages++;input.value='';const idx=appendMessage('bot','');streamText(idx,'Генерирую ответ...');try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'system',content:PERSONAS[STATE.persona].desc+(STATE.memory.length?' Память: '+STATE.memory.join('; '):'')+(STATE.settings.customPrompt?' '+STATE.settings.customPrompt:'')},{role:'user',content:text}]})});const d=await r.json();const reply=d?.choices?.[0]?.message?.content||'Ошибка API';STATE.totalTokens+=d?.usage?.total_tokens||Math.round(reply.length*1.5);streamText(idx,reply)}catch(e){streamText(idx,'Демо-ответ: проверьте GROQ_API_KEY в ENV или используйте локально')}updateKPIs()}
+function vote(idx, type, btn) {
+  STATE.messages[idx].vote = type;
+  btn.parentElement.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('active-up', 'active-down'));
+  if (type === 'up') {
+    btn.classList.add('active-up');
+    STATE.votes.up++;
+  } else {
+    btn.classList.add('active-down');
+    STATE.votes.down++;
+  }
+  updateKPIs();
+  toast(type === 'up' ? 'Спасибо за оценку! 👍' : 'Попробуем лучше! 👎');
+}
 
-function streamText(idx,text){const el=$('bubble-'+idx);let i=0;const timer=setInterval(()=>{i+=Math.ceil(Math.random()*5);el.textContent=text.slice(0,i);$('messages').scrollTop=$('messages').scrollHeight;if(i>=text.length){clearInterval(timer);STATE.messages[idx].text=text;updateKPIs()}},20)}
+function speak(idx) {
+  const text = STATE.messages[idx].text;
+  if (!window.speechSynthesis) return toast('Голос не поддерживается', 'error');
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ru-RU';
+  window.speechSynthesis.speak(u);
+}
 
-function vote(idx,type,btn){STATE.messages[idx].vote=type;btn.parentElement.querySelectorAll('.vote-btn').forEach(b=>b.classList.remove('active-up','active-down'));if(type==='up'){btn.classList.add('active-up');STATE.votes.up++}else{btn.classList.add('active-down');STATE.votes.down++}updateKPIs();toast(type==='up'?'Спасибо!':'Фидбек сохранён')}
+function testVoice() {
+  speak(STATE.messages.findIndex(m => m.role === 'bot'));
+}
 
-function speak(idx){const text=STATE.messages[idx].text;if(!window.speechSynthesis)return toast('Озвучка не поддерживается','error');window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ru-RU';window.speechSynthesis.speak(u)}
+function stopVoice() {
+  window.speechSynthesis?.cancel();
+}
 
-function testVoice(){speak(STATE.messages.findIndex(m=>m.role==='bot'))}
-function stopVoice(){window.speechSynthesis?.cancel()}
+// ========== FILES ==========
+function handleFiles(e) {
+  const wrap = $('fileChips');
+  wrap.innerHTML = '';
+  [...e.target.files].forEach(f => {
+    STATE.files.push(f);
+    const c = document.createElement('span');
+    c.className = 'file-chip';
+    c.innerHTML = `${f.type.includes('image') ? '🖼️' : '📄'} ${f.name} <button onclick="this.parentElement.remove()">✕</button>`;
+    wrap.appendChild(c);
+  });
+  toast('Файлы добавлены');
+}
 
-// FILES
-function handleFiles(e){const wrap=$('fileChips');wrap.innerHTML='';[...e.target.files].forEach(f=>{STATE.files.push(f);const c=document.createElement('span');c.className='file-chip';c.innerHTML=`${f.type.includes('image')?'🖼️':'📄'} ${f.name} <button onclick="this.parentElement.remove()">✕</button>`;wrap.appendChild(c)});toast('Файлы добавлены')}
+// ========== TEMPLATES ==========
+function openTemplates() {
+  const body = $('templateBody');
+  if (!body) return;
+  body.innerHTML = '';
+  
+  const templates = PERSONAS[STATE.persona].templates || [{ title: 'Простой вопрос', text: 'Расскажи мне о:' }];
+  
+  templates.forEach(({title, text}) => {
+    const d = document.createElement('div');
+    d.className = 'tpl-card';
+    d.innerHTML = `<h4>${title}</h4><p>${text}</p>`;
+    d.onclick = () => { $('chatInput').value = text; closeModal('templateModal'); $('chatInput').focus(); };
+    body.appendChild(d);
+  });
+  openModal('templateModal');
+}
 
-// TEMPLATES
-function openTemplates(){const body=$('templateBody');body.innerHTML='';PERSONAS[STATE.persona].templates.forEach(([title,text])=>{const d=document.createElement('div');d.className='tpl-card';d.innerHTML=`<h4>${title}</h4><p>${text}</p>`;d.onclick=()=>{$('chatInput').value=text;closeModal('templateModal');$('chatInput').focus()};body.appendChild(d)});openModal('templateModal')}
+// ========== SHARE ==========
+function shareChat() {
+  const payload = { persona: STATE.persona, messages: STATE.messages, brand: STATE.brand, ts: Date.now() };
+  const link = location.origin + '/shared/' + btoa(JSON.stringify(payload)).slice(0, 200);
+  $('shareLinkInput').value = link;
+  $('sharePreview').textContent = JSON.stringify(payload, null, 2).slice(0, 800);
+  openModal('shareModal');
+}
 
-// SHARE
-function shareChat(){const payload={persona:STATE.persona,messages:STATE.messages,brand:STATE.brand,ts:Date.now()};const link=location.origin+'/shared/'+btoa(JSON.stringify(payload).slice(0,200));$('shareLinkInput').value=link;$('sharePreview').textContent=JSON.stringify(payload,null,2).slice(0,800);openModal('shareModal')}
-function copyShareLink(){$('shareLinkInput').select();document.execCommand('copy');toast('Ссылка скопирована')}
+function copyShareLink() {
+  $('shareLinkInput').select();
+  document.execCommand('copy');
+  toast('Ссылка скопирована');
+}
 
-// PDF EXPORT
-function exportPdf(){const{jsPDF}=window.jspdf;const doc=new jsPDF();doc.setFont('helvetica');doc.setFontSize(16);doc.text('NexusAI — Отчёт по диалогу',14,16);doc.setFontSize(11);doc.text('Персонаж: '+PERSONAS[STATE.persona].name,14,26);let y=36;STATE.messages.forEach(m=>{const role=m.role==='user'?'Вы':'AI';const lines=doc.splitTextToSize(`${role}: ${m.text.slice(0,300)}`,180);if(y+lines.length*6>280){doc.addPage();y=20}doc.text(lines,14,y);y+=lines.length*6+4});doc.save('nexusai-chat.pdf');toast('PDF экспортирован')}
+// ========== PDF ==========
+function exportPdf() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFont('helvetica');
+  doc.setFontSize(16);
+  doc.text('NexusAI — Диалог', 14, 16);
+  doc.setFontSize(11);
+  doc.text('Персонаж: ' + PERSONAS[STATE.persona].name, 14, 26);
+  let y = 36;
+  STATE.messages.forEach(m => {
+    const role = m.role === 'user' ? 'Вы' : 'AI';
+    const lines = doc.splitTextToSize(role + ': ' + m.text.slice(0, 300), 180);
+    if (y + lines.length * 6 > 280) { doc.addPage(); y = 20; }
+    doc.text(lines, 14, y);
+    y += lines.length * 6 + 4;
+  });
+  doc.save('nexusai-chat.pdf');
+  toast('PDF экспортирован');
+}
 
-// MEMORY
-function renderMemory(){$('memoryList').innerHTML=STATE.memory.map((m,i)=>`<span class="memory-chip">🧠 ${m} <button onclick="deleteMemory(${i})">✕</button></span>`).join('');renderMemoryPreview()}
-function renderMemoryPreview(){const prev=$('memoryPreview');if(!prev)return;prev.innerHTML=STATE.memory.slice(0,3).map(m=>`<div class="memory-chip">${m}</div>`).join('')}
-function saveMemory(){const v=$('memoryInput').value.trim();if(!v)return;STATE.memory.push(v);$('memoryInput').value='';renderMemory();toast('Факт добавлен')}
-function deleteMemory(i){STATE.memory.splice(i,1);renderMemory()}
+// ========== MEMORY ==========
+function renderMemory() {
+  $('memoryList').innerHTML = STATE.memory.map((m, i) => 
+    `<span class="memory-chip">${m} <button onclick="deleteMemory(${i})">✕</button></span>`
+  ).join('');
+  renderMemoryPreview();
+}
 
-// BRAND
-function applyBrand(){STATE.brand.name=$('brandName').value||'NexusAI';STATE.brand.domain=$('brandDomain').value||'nexusai.ru';STATE.brand.logo=$('brandLogo').value||'N';STATE.brand.color=$('brandColor').value;document.documentElement.style.setProperty('--accent',STATE.brand.color);$('sidebarBrand').textContent=STATE.brand.name;$('sidebarDomain').textContent=STATE.brand.domain;$('sidebarLogo').textContent=STATE.brand.logo;updateBrandPreview();toast('Бренд применён')}
-function updateBrandPreview(){$('previewLogo').textContent=$('brandLogo').value||STATE.brand.logo;$('previewName').textContent=$('brandName').value||STATE.brand.name;$('previewDomain').textContent=$('brandDomain').value||STATE.brand.domain;$('brandName').value=STATE.brand.name;$('brandDomain').value=STATE.brand.domain;$('brandLogo').value=STATE.brand.logo;$('brandColor').value=STATE.brand.color}
+function renderMemoryPreview() {
+  const prev = $('memoryPreview');
+  if (!prev) return;
+  prev.innerHTML = STATE.memory.slice(0, 3).map(m => `<div class="memory-chip">${m}</div>`).join('');
+}
 
-// TEAM
-function renderTeam(){$('teamList').innerHTML=STATE.team.map((u,i)=>`<div class="team-row"><div><div style="font-weight:700">${u.email}</div><div style="font-size:12px;color:var(--text-2)">${u.role}</div></div><button class="btn btn-sm" onclick="removeTeam(${i})">Удалить</button></div>`).join('')}
-function addTeamMember(){const email=$('teamEmail').value.trim(),role=$('teamRole').value;if(!email)return toast('Введите email','error');STATE.team.push({email,role});$('teamEmail').value='';renderTeam();toast('Сотрудник добавлен')}
-function removeTeam(i){STATE.team.splice(i,1);renderTeam()}
+function saveMemory() {
+  const v = $('memoryInput').value.trim();
+  if (!v) return;
+  STATE.memory.push(v);
+  $('memoryInput').value = '';
+  renderMemory();
+  toast('Факт сохранён');
+}
 
-// DEBATE
-function populateDebateSelects(){const keys=Object.keys(PERSONAS);['debateP1','debateP2'].forEach((id,idx)=>{$(id).innerHTML=keys.map((k,i)=>`<option value="${k}"${i===idx?' selected':''}>${PERSONAS[k].name}</option>`).join('')})}
-function runDebate(){const p1=$('debateP1').value,p2=$('debateP2').value,topic=$('debateTopic').value||'Как решить задачу?';const t=`[${PERSONAS[p1].name}]\nЯ считаю: по теме "${topic}" нужна быстрая практика.\n\n[${PERSONAS[p2].name}]\nНе согласен: без структуры будет поверхностно.\n\n[${PERSONAS[p1].name}]\nТогда компромисс: короткий пилот + метрики + дедлайн на пересмотр.\n\n[Итог]\nЛучший путь — тест с KPI, затем масштабирование.`;$('debateResult').textContent=t}
-function insertDebateToChat(){const t=$('debateResult').textContent;if(!t||t.includes('Нажмите'))return toast('Сначала сгенерируйте','warn');closeModal('debateModal');showSection('chat');appendMessage('bot',t)}
+function deleteMemory(i) {
+  STATE.memory.splice(i, 1);
+  renderMemory();
+}
 
-// WEBHOOK
-function renderWebhookDocs(){const base=location.origin;$('webhookCode').textContent=`fetch('${base}/api/chat', {\n  method: 'POST',\n  headers: {'Content-Type': 'application/json'},\n  body: JSON.stringify({\n    messages: [{role: 'user', content: 'Привет'}]\n  })\n})`;$('widgetCode').textContent=`<script src="${base}/widget.js"\n  data-brand="${STATE.brand.name}"\n  data-color="${STATE.brand.color}">\n<\/script>`}
-function copyCode(id){navigator.clipboard?.writeText($(id).textContent);toast('Код скопирован')}
+// ========== BRAND ==========
+function applyBrand() {
+  STATE.brand.name = $('brandName').value || 'NexusAI';
+  STATE.brand.domain = $('brandDomain').value || 'nexusai.ru';
+  STATE.brand.logo = $('brandLogo').value || 'N';
+  STATE.brand.color = $('brandColor').value;
+  
+  document.documentElement.style.setProperty('--accent', STATE.brand.color);
+  $('sidebarBrand').textContent = STATE.brand.name;
+  $('sidebarDomain').textContent = STATE.brand.domain;
+  $('sidebarLogo').textContent = STATE.brand.logo;
+  
+  updateBrandPreview();
+  toast('Бренд применён');
+}
 
-// TELEGRAM
-function generateTgCode(){const token=$('tgToken').value||'YOUR_BOT_TOKEN',webhook=$('tgWebhook').value||'https://your-domain.vercel.app/api/telegram';$('tgCode').textContent=`export default async function handler(req, res) {\n  const update = req.body;\n  const text = update.message?.text || '';\n  \n  const answer = await fetch('${location.origin}/api/chat', {\n    method: 'POST',\n    headers: {'Content-Type': 'application/json'},\n    body: JSON.stringify({messages: [{role: 'user', content: text}]})\n  }).then(r => r.json());\n  \n  await fetch('https://api.telegram.org/bot${token}/sendMessage', {\n    method: 'POST',\n    headers: {'Content-Type': 'application/json'},\n    body: JSON.stringify({\n      chat_id: update.message.chat.id,\n      text: answer.choices?.[0]?.message?.content || 'Ошибка'\n    })\n  });\n  \n  res.status(200).json({ok: true});\n}`;toast('Код сгенерирован')}
+function updateBrandPreview() {
+  $('previewLogo').textContent = $('brandLogo').value || STATE.brand.logo;
+  $('previewName').textContent = $('brandName').value || STATE.brand.name;
+  $('previewDomain').textContent = $('brandDomain').value || STATE.brand.domain;
+  $('brandName').value = STATE.brand.name;
+  $('brandDomain').value = STATE.brand.domain;
+  $('brandLogo').value = STATE.brand.logo;
+  $('brandColor').value = STATE.brand.color;
+}
 
-// SETTINGS
-function saveSettings(){if(STATE.user){STATE.user.name=$('settingsName').value;STATE.user.email=$('settingsEmail').value;$('userName').textContent=STATE.user.name}STATE.settings.customPrompt=$('customPrompt').value;toast('Настройки сохранены')}
+// ========== TEAM ==========
+function renderTeam() {
+  $('teamList').innerHTML = STATE.team.map((u, i) => `
+    <div class="team-row">
+      <div><div style="font-weight:700">${u.email}</div><div style="font-size:12px;color:var(--text-2)">${u.role}</div></div>
+      <button class="btn btn-sm" onclick="removeTeam(${i})">Удалить</button>
+    </div>
+  `).join('');
+}
 
-// ANALYTICS
-function renderDash(){updateKPIs();const data1={labels:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],datasets:[{label:'Сообщения',data:[5,12,8,15,STATE.totalMessages,6,3],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',fill:true,tension:.3}]};const data2={labels:['Программист','Бизнес','Маркетолог','Юрист','Учитель','Аналитик'],datasets:[{label:'Использование',data:[48,35,61,22,18,14],backgroundColor:['#3b82f6','#8b5cf6','#22c55e','#f59e0b','#f87171','#06b6d4']}]};renderChart('dashChart1','line',data1);renderChart('dashChart2','bar',data2)}
+function addTeamMember() {
+  const email = $('teamEmail').value.trim(), role = $('teamRole').value;
+  if (!email) return toast('Введите email', 'error');
+  STATE.team.push({ email, role });
+  $('teamEmail').value = '';
+  renderTeam();
+  toast('Участник добавлен');
+}
+
+function removeTeam(i) {
+  STATE.team.splice(i, 1);
+  renderTeam();
+}
+
+// ========== DEBATE ==========
+function populateDebateSelects() {
+  const keys = Object.keys(PERSONAS);
+  [$('debateP1'), $('debateP2')].forEach((id, idx) => {
+    id.innerHTML = keys.map((k, i) => `<option value="${k}"${i === idx ? ' selected' : ''}>${PERSONAS[k].name}</option>`).join('');
+  });
+}
+
+function runDebate() {
+  const p1 = $('debateP1').value, p2 = $('debateP2').value, topic = $('debateTopic').value || '?';
+  const t = `${PERSONAS[p1].name}: "${topic} — да!"\n${PERSONAS[p2].name}: "Не согласен."\n${PERSONAS[p1].name}: "Вот мои аргументы..." KPI, метрики, примеры.`;
+  $('debateResult').textContent = t;
+}
+
+function insertDebateToChat() {
+  const t = $('debateResult').textContent;
+  if (!t || t.includes('?')) return toast('Сначала сгенерируйте дебат', 'warn');
+  closeModal('debateModal');
+  showSection('chat');
+  appendMessage('bot', t);
+}
+
+// ========== WEBHOOK ==========
+function renderWebhookDocs() {
+  const base = location.origin;
+  $('webhookCode').textContent = `fetch('${base}/api/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ messages: [{ role: 'user', content: '...' }] })
+}).then(r => r.json())`;
+  
+  $('widgetCode').textContent = `<script src="${base}/widget.js" data-brand="${STATE.brand.name}" data-color="${STATE.brand.color}"></script>`;
+}
+
+function copyCode(id) {
+  navigator.clipboard?.writeText($(id).textContent);
+  toast('Код скопирован');
+}
+
+// ========== TELEGRAM ==========
+function generateTgCode() {
+  const token = $('tgToken').value || 'YOUR_BOT_TOKEN', webhook = $('tgWebhook').value || 'https://your-domain.vercel.app/api/telegram';
+  $('tgCode').textContent = `export default async function handler(req, res) {
+  const update = req.body;
+  const text = update.message?.text;
+  
+  const answer = await fetch('${location.origin}/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: [{ role: 'user', content: text }] })
+  }).then(r => r.json());
+  
+  await fetch('https://api.telegram.org/bot${token}/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: update.message.chat.id,
+      text: answer.choices?.[0]?.message?.content
+    })
+  });
+  
+  res.status(200).json({ ok: true });
+}`;
+  toast('Telegram-код сгенерирован');
+}
+
+// ========== SETTINGS ==========
+function saveSettings() {
+  if (STATE.user) {
+    STATE.user.name = $('settingsName').value;
+    STATE.user.email = $('settingsEmail').value;
+    $('userName').textContent = STATE.user.name;
+  }
+  STATE.settings.customPrompt = $('customPrompt').value;
+  toast('Настройки сохранены');
+}
+
+// ========== ANALYTICS ==========
+function renderDash() {
+  updateKPIs();
+  const data1 = {
+    labels: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
+    datasets: [{
+      label: 'Сообщения',
+      data: [5, 12, 8, 15, STATE.totalMessages, 6, 3],
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59,130,246,.1)',
+      fill: true,
+      tension: .3
+    }]
+  };
+  const data2 = {
+    labels: ['Groq','OpenAI','Claude','Gemini','Local','Other'],
+    datasets: [{
+      label: 'Токены',
+      data: [48, 35, 61, 22, 18, 14],
+      backgroundColor: ['#3b82f6','#8b5cf6','#22c55e','#f59e0b','#f87171','#06b6d4']
+    }]
+  };
+  renderChart('dashChart1', 'line', data1);
+  renderChart('dashChart2', 'bar', data2);
+}
 
 function renderAnalytics() {
   const html = `
     <div class="analytics-grid">
-      <!-- KPI Карточки -->
+      <!-- KPI -->
       <div class="kpi-card">
         <div class="kpi-value">12,847</div>
-        <div class="kpi-label">Всего запросов</div>
+        <div class="kpi-label">Всего сообщений</div>
         <div class="kpi-change">+18% за месяц</div>
       </div>
-      
       <div class="kpi-card">
         <div class="kpi-value">4,231</div>
-        <div class="kpi-label">Активных пользователей</div>
+        <div class="kpi-label">Пользователей</div>
         <div class="kpi-change">+12% за месяц</div>
       </div>
-      
       <div class="kpi-card">
-        <div class="kpi-value">$2,340</div>
-        <div class="kpi-label">Расходы API</div>
-        <div class="kpi-change warn">+23% за месяц</div>
+        <div class="kpi-value">2,340</div>
+        <div class="kpi-label">API вызовов</div>
+        <div class="kpi-change warn">-23% за месяц</div>
       </div>
-      
       <div class="kpi-card">
         <div class="kpi-value">0.18s</div>
-        <div class="kpi-label">Средний ответ</div>
-        <div class="kpi-change">-8% (быстрее)</div>
+        <div class="kpi-label">Ответ</div>
+        <div class="kpi-change">-8% за месяц</div>
       </div>
       
-      <!-- Компактные графики -->
+      <!-- Графики -->
       <div class="chart-mini">
-        <h4>Запросы по часам</h4>
+        <h4>Активность по дням</h4>
         <canvas id="miniChart1" height="80"></canvas>
       </div>
-      
       <div class="chart-mini">
-        <h4>Топ модели</h4>
+        <h4>Популярные модели</h4>
         <canvas id="miniChart2" height="80"></canvas>
       </div>
     </div>
   `;
+  $('section-analytics').innerHTML = html;
   
-  dash.innerHTML = html;
-  
-  // Мини-графики (линейные, без легенд)
-  new Chart(document.getElementById('miniChart1'), {
-    type: 'line',
-    data: { /* упрощённые данные */ },
-    options: { 
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { x: { display: false }, y: { display: false } }
-    }
-  });
+  // Графики - упрощенная версия, можно раскомментировать если есть Chart.js
+  // new Chart($('miniChart1'), { type: 'line', data: {...}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } } });
 }
 
-function updateKPIs(){$('kpiMessages').textContent=STATE.totalMessages;$('kpiTokens').textContent=STATE.totalTokens.toLocaleString('ru');$('kpiVotes').textContent=STATE.votes.up+STATE.votes.down;$('tokenCounter').textContent=STATE.totalTokens.toLocaleString('ru')}
+function updateKPIs() {
+  $('kpiMessages').textContent = STATE.totalMessages;
+  $('kpiTokens').textContent = STATE.totalTokens.toLocaleString('ru');
+  $('kpiVotes').textContent = STATE.votes.up + STATE.votes.down;
+  $('tokenCounter').textContent = STATE.totalTokens.toLocaleString('ru');
+}
 
-// MODAL
-function openModal(id){$(id).classList.add('open')}
-function closeModal(id){$(id).classList.remove('open')}
+// ========== MODAL ==========
+function openModal(id) { $(id).classList.add('open'); }
+function closeModal(id) { $(id).classList.remove('open'); }
 
-// INIT
-window.onload=function(){
-  // Анимация моргания
-  setInterval(()=>{
-    document.getElementById('eyeL').style.transform='scaleY(0.1)';
-    document.getElementById('eyeR').style.transform='scaleY(0.1)';
-    setTimeout(()=>{
-      document.getElementById('eyeL').style.transform='scaleY(1)';
-      document.getElementById('eyeR').style.transform='scaleY(1)';
-    },150)
-  },3000+Math.random()*2000);
+// ========== CHART ==========
+function renderChart(id, type, data) {
+  if (charts[id]) charts[id].destroy();
+  const canvas = $(id);
+  if (!canvas) return;
+  charts[id] = new Chart(canvas, { type, data, options: { responsive: true, maintainAspectRatio: true } });
+}
+
+// ========== INIT ==========
+window.onload = function() {
+  setInterval(() => {
+    $('eyeL').style.transform = 'scaleY(0.1)';
+    $('eyeR').style.transform = 'scaleY(0.1)';
+    setTimeout(() => {
+      $('eyeL').style.transform = 'scaleY(1)';
+      $('eyeR').style.transform = 'scaleY(1)';
+    }, 150);
+  }, 3000 + Math.random() * 2000);
   
-  // ✨ ДОБАВИТЬ ЭТИ 2 СТРОКИ ✨
-  updateModels(); // Заполнить список моделей
+  updateModels();
   
-  // Восстановить тему из памяти
   if (localStorage.getItem('theme') === 'dark') {
     document.body.classList.add('dark-theme');
-    document.getElementById('themeIcon').textContent = '☀️';
+    $('themeIcon').textContent = '☀️';
   }
 };
 </script>
 </body>
 </html>
-
