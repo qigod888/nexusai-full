@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "api/chat.js": { "maxDuration": 30 },
+    "api/stream.js": { "maxDuration": 30 },
+    "api/tts.js": { "maxDuration": 30 },
+    "api/share.js": { "maxDuration": 30 }
+  },
+  "rewrites": [
+    { "source": "/widget.js", "destination": "/widget.js" },
+    { "source": "/api/chat", "destination": "/api/chat.js" },
+    { "source": "/api/stream", "destination": "/api/stream.js" },
+    { "source": "/api/share", "destination": "/api/share.js" },
+    { "source": "/api/tts", "destination": "/api/tts.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
