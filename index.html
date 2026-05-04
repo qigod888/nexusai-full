@@ -97,6 +97,48 @@ textarea.form-input{resize:vertical;min-height:80px}
 .bot-mouth{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);width:28px;height:12px;border-radius:0 0 18px 18px;background:linear-gradient(180deg,#f07c7c,#ca2f2f)}
 .bot-torso{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:100px;height:72px;border-radius:54px 54px 0 0;background:linear-gradient(160deg,var(--accent),var(--accent-2))}
 @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.kpi-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.kpi-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111;
+}
+
+.kpi-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.kpi-change {
+  font-size: 13px;
+  color: #10b981;
+  margin-top: 8px;
+}
+
+.kpi-change.warn { color: #ef4444; }
+
+.chart-mini {
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  grid-column: span 2;
+}
 </style>
 </head>
 <body>
@@ -233,12 +275,22 @@ textarea.form-input{resize:vertical;min-height:80px}
       <div class="nav-item" onclick="showSection('telegram')">📲 Telegram</div>
       <div class="nav-item" onclick="showSection('settings')">⚙️ Настройки</div>
       <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--border)">
-        <div style="padding:12px;background:var(--surface-2);border-radius:10px;margin-bottom:10px">
-          <div style="font-weight:700;font-size:14px" id="userName">Demo User</div>
-          <div style="font-size:12px;color:var(--text-2)" id="userPlan">Business</div>
-        </div>
-        <button class="btn" style="width:100%" onclick="doLogout()">↩ Выйти</button>
-      </div>
+  
+  <!-- ✨ ДОБАВИТЬ ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ✨ -->
+  <div class="theme-toggle" onclick="toggleTheme()" 
+       style="display:flex;align-items:center;gap:8px;padding:12px;
+              cursor:pointer;border-radius:10px;margin-bottom:10px;
+              background:var(--surface-2)">
+    <span id="themeIcon" style="font-size:20px">🌙</span>
+    <span style="font-size:14px;font-weight:600">Сменить тему</span>
+  </div>
+  
+  <div style="padding:12px;background:var(--surface-2);border-radius:10px;margin-bottom:10px">
+    <div style="font-weight:700;font-size:14px" id="userName">Demo User</div>
+    <div style="font-size:12px;color:var(--text-2)" id="userPlan">Business</div>
+  </div>
+  <button class="btn" style="width:100%" onclick="doLogout()">↩ Выйти</button>
+</div>
     </div>
 
     <!-- MAIN CONTENT -->
@@ -459,23 +511,43 @@ textarea.form-input{resize:vertical;min-height:80px}
                 <textarea class="form-input" id="customPrompt" placeholder="Дополнительные инструкции для AI..."></textarea>
               </div>
               <button class="btn btn-primary" onclick="saveSettings()">Сохранить</button>
-            </div>
-            <div class="card">
-              <h3 style="margin-bottom:16px">API ключи</h3>
-              <div style="margin-bottom:12px">
-                <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">Groq API Key</label>
-                <input class="form-input" type="password" id="groqKey" placeholder="gsk_...">
-              </div>
-              <div style="margin-bottom:12px">
-                <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">Gemini API Key</label>
-                <input class="form-input" type="password" id="geminiKey" placeholder="AIza...">
-              </div>
-              <div style="margin-bottom:12px">
-                <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">ElevenLabs Key</label>
-                <input class="form-input" type="password" id="elevenKey" placeholder="eleven...">
-              </div>
-              <p style="font-size:12px;color:var(--text-2);margin-top:8px">Ключи хранятся локально в браузере</p>
-            </div>
+          </div>
+<div class="card">
+  <h3 style="margin-bottom:16px">⚙️ Персонализация</h3>
+  
+  <div style="margin-bottom:12px">
+    <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">
+      Системный промпт (необязательно)
+    </label>
+    <textarea 
+      class="form-input" 
+      id="customPrompt" 
+      rows="3" 
+      placeholder="Дополнительные инструкции для AI...">
+    </textarea>
+  </div>
+  
+  <div style="margin-bottom:12px">
+    <label style="display:block;font-size:13px;color:var(--text-2);margin-bottom:6px">
+      Язык интерфейса
+    </label>
+    <select class="form-input" id="langSelect">
+      <option value="ru">🇷🇺 Русский</option>
+      <option value="en">🇬🇧 English</option>
+    </select>
+  </div>
+  
+  <div style="margin-bottom:12px">
+    <label style="display:flex;align-items:center;cursor:pointer">
+      <input type="checkbox" id="soundToggle" style="margin-right:8px">
+      <span style="font-size:14px">🔊 Звуковые уведомления</span>
+    </label>
+  </div>
+  
+  <p style="font-size:12px;color:var(--text-2);margin-top:8px">
+    ✨ Настройки сохраняются автоматически
+  </p>
+</div>
           </div>
         </div>
 
@@ -484,9 +556,54 @@ textarea.form-input{resize:vertical;min-height:80px}
   </div>
 </div>
 <script>
-// STATE
-const STATE={user:null,section:'dashboard',persona:'coder',messages:[],totalTokens:0,totalMessages:0,votes:{up:0,down:0},files:[],memory:['Я работаю в Краснодаре','У меня ИП на УСН'],team:[{email:'owner@nexusai.ru',role:'Admin'},{email:'manager@nexusai.ru',role:'Editor'}],brand:{name:'NexusAI',domain:'nexusai.ru',logo:'N',color:'#3b82f6'},settings:{customPrompt:''}};
+// STATE — единый объект
+const STATE = {
+  // Существующие поля
+  user: null,
+  section: 'dashboard',
+  persona: 'coder',
+  messages: [],
+  totalTokens: 0,
+  totalMessages: 0,
+  votes: { up: 0, down: 0 },
+  files: [],
+  memory: ['Я нейрокодер из провинции', 'Моя задача - миллиард на AI'],
+  team: [
+    { email: 'owner@nexusai.ru', role: 'Admin' },
+    { email: 'manager@nexusai.ru', role: 'Editor' }
+  ],
+  brand: {
+    name: 'NexusAI',
+    domain: 'nexusai.ru',
+    logo: 'N',
+    color: '#3b82f6'
+  },
+  settings: { customPrompt: '' },
+  
+  // ✨ НОВЫЕ поля для выбора моделей
+  selectedModel: 'llama-3.3-70b-versatile',
+  selectedProvider: 'groq'
+};
 
+// MODELS — отдельный объект (не внутри STATE)
+const MODELS = {
+  groq: [
+    { id: 'llama-3.3-70b-versatile', name: 'LLaMA 3.3 70B', speed: 'fast', cost: 'low' },
+    { id: 'llama-3.1-8b-instant', name: 'LLaMA 3.1 8B', speed: 'ultra', cost: 'minimal' },
+    { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B', speed: 'fast', cost: 'low' }
+  ],
+  openai: [
+    { id: 'gpt-4o', name: 'GPT-4o', speed: 'medium', cost: 'high' },
+    { id: 'gpt-4o-mini', name: 'GPT-4o Mini', speed: 'fast', cost: 'medium' },
+    { id: 'o1-mini', name: 'O1 Mini', speed: 'slow', cost: 'very-high' }
+  ],
+  anthropic: [
+    { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', speed: 'medium', cost: 'high' }
+  ],
+  gemini: [
+    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', speed: 'ultra', cost: 'low' }
+  ]
+};
 const PERSONAS = {
   helper: {
     name: 'Помощник',
@@ -525,7 +642,57 @@ const PERSONAS = {
     greeting: 'Привет! Чему сегодня будем учиться?'
   }
 };
+// Функция обновления списка моделей при смене провайдера
+function updateModels() {
+  const provider = document.getElementById('providerSelect').value;
+  const modelSelect = document.getElementById('modelSelect');
+  const modelInfo = document.querySelector('.model-info');
+  
+  // Очистить старые опции
+  modelSelect.innerHTML = '';
+  
+  // Добавить модели выбранного провайдера
+  MODELS[provider].forEach(model => {
+    const option = document.createElement('option');
+    option.value = model.id;
+    option.textContent = model.name;
+    modelSelect.appendChild(option);
+  });
+  
+  // Обновить STATE
+  STATE.selectedProvider = provider;
+  STATE.selectedModel = MODELS[provider][0].id;
+  
+  // Показать характеристики первой модели
+  const firstModel = MODELS[provider][0];
+  modelInfo.textContent = `⚡ ${firstModel.speed} | 💰 ${firstModel.cost}`;
+}
 
+// При смене модели в селекторе
+function onModelChange() {
+  const modelId = document.getElementById('modelSelect').value;
+  STATE.selectedModel = modelId;
+  
+  // Найти инфо о модели
+  const model = MODELS[STATE.selectedProvider].find(m => m.id === modelId);
+  document.querySelector('.model-info').textContent = `⚡ ${model.speed} | 💰 ${model.cost}`;
+}
+  function onModelChange() {
+  const modelId = document.getElementById('modelSelect').value;
+  STATE.selectedModel = modelId;
+  
+  const model = MODELS[STATE.selectedProvider].find(m => m.id === modelId);
+  document.querySelector('.model-info').textContent = `⚡ ${model.speed} | 💰 ${model.cost}`;
+}
+
+// ✨ ДОБАВИТЬ СЮДА ✨
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark-theme');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
+}
+
+let charts={};  // ← эта строка у вас уже есть
 let charts={};
 
 // UTILS
@@ -609,9 +776,61 @@ function saveSettings(){if(STATE.user){STATE.user.name=$('settingsName').value;S
 // ANALYTICS
 function renderDash(){updateKPIs();const data1={labels:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],datasets:[{label:'Сообщения',data:[5,12,8,15,STATE.totalMessages,6,3],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',fill:true,tension:.3}]};const data2={labels:['Программист','Бизнес','Маркетолог','Юрист','Учитель','Аналитик'],datasets:[{label:'Использование',data:[48,35,61,22,18,14],backgroundColor:['#3b82f6','#8b5cf6','#22c55e','#f59e0b','#f87171','#06b6d4']}]};renderChart('dashChart1','line',data1);renderChart('dashChart2','bar',data2)}
 
-function renderAnalytics(){const data1={labels:['Нед 1','Нед 2','Нед 3','Нед 4'],datasets:[{label:'Сообщения',data:[102,131,148,STATE.totalMessages+140],backgroundColor:'#3b82f6'}]};const data2={labels:['Пн','Вт','Ср','Чт','Пт'],datasets:[{label:'Токены',data:[3200,5100,6700,7200,STATE.totalTokens+5000],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.1)',fill:true,tension:.3}]};renderChart('analyticsChart1','bar',data1);renderChart('analyticsChart2','line',data2);const table=$('analyticsTable');if(table)table.innerHTML='<tr style="border-bottom:1px solid var(--border);font-weight:700;font-size:12px;color:var(--text-3)"><td style="padding:10px">Дата</td><td>Персонаж</td><td>Сообщения</td><td>Токены</td><td>Фидбек</td></tr>'+[{d:'04.05.2026',p:'💻 Программист',m:9,t:4200,f:'👍 5 / 👎 1'},{d:'03.05.2026',p:'📣 Маркетолог',m:11,t:5300,f:'👍 7 / 👎 1'}].map(x=>`<tr style="border-bottom:1px solid rgba(255,255,255,.03)"><td style="padding:10px">${x.d}</td><td>${x.p}</td><td>${x.m}</td><td>${x.t}</td><td>${x.f}</td></tr>`).join('')}
-
-function renderChart(id,type,data){const ctx=$(id);if(!ctx)return;if(charts[id])charts[id].destroy();charts[id]=new Chart(ctx,{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#edf2ff'}}}}})}
+function renderAnalytics() {
+  const html = `
+    <div class="analytics-grid">
+      <!-- KPI Карточки -->
+      <div class="kpi-card">
+        <div class="kpi-value">12,847</div>
+        <div class="kpi-label">Всего запросов</div>
+        <div class="kpi-change">+18% за месяц</div>
+      </div>
+      
+      <div class="kpi-card">
+        <div class="kpi-value">4,231</div>
+        <div class="kpi-label">Активных пользователей</div>
+        <div class="kpi-change">+12% за месяц</div>
+      </div>
+      
+      <div class="kpi-card">
+        <div class="kpi-value">$2,340</div>
+        <div class="kpi-label">Расходы API</div>
+        <div class="kpi-change warn">+23% за месяц</div>
+      </div>
+      
+      <div class="kpi-card">
+        <div class="kpi-value">0.18s</div>
+        <div class="kpi-label">Средний ответ</div>
+        <div class="kpi-change">-8% (быстрее)</div>
+      </div>
+      
+      <!-- Компактные графики -->
+      <div class="chart-mini">
+        <h4>Запросы по часам</h4>
+        <canvas id="miniChart1" height="80"></canvas>
+      </div>
+      
+      <div class="chart-mini">
+        <h4>Топ модели</h4>
+        <canvas id="miniChart2" height="80"></canvas>
+      </div>
+    </div>
+  `;
+  
+  dash.innerHTML = html;
+  
+  // Мини-графики (линейные, без легенд)
+  new Chart(document.getElementById('miniChart1'), {
+    type: 'line',
+    data: { /* упрощённые данные */ },
+    options: { 
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { display: false }, y: { display: false } }
+    }
+  });
+}
 
 function updateKPIs(){$('kpiMessages').textContent=STATE.totalMessages;$('kpiTokens').textContent=STATE.totalTokens.toLocaleString('ru');$('kpiVotes').textContent=STATE.votes.up+STATE.votes.down;$('tokenCounter').textContent=STATE.totalTokens.toLocaleString('ru')}
 
@@ -620,7 +839,26 @@ function openModal(id){$(id).classList.add('open')}
 function closeModal(id){$(id).classList.remove('open')}
 
 // INIT
-window.onload=()=>{nav('landing');setInterval(()=>{['eyeL','eyeR'].forEach(id=>{const e=$(id);if(e){e.style.transform='scaleY(.1)';setTimeout(()=>e.style.transform='scaleY(1)',120)}})},3500)}
+window.onload=function(){
+  // Анимация моргания
+  setInterval(()=>{
+    document.getElementById('eyeL').style.transform='scaleY(0.1)';
+    document.getElementById('eyeR').style.transform='scaleY(0.1)';
+    setTimeout(()=>{
+      document.getElementById('eyeL').style.transform='scaleY(1)';
+      document.getElementById('eyeR').style.transform='scaleY(1)';
+    },150)
+  },3000+Math.random()*2000);
+  
+  // ✨ ДОБАВИТЬ ЭТИ 2 СТРОКИ ✨
+  updateModels(); // Заполнить список моделей
+  
+  // Восстановить тему из памяти
+  if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-theme');
+    document.getElementById('themeIcon').textContent = '☀️';
+  }
+};
 </script>
 </body>
 </html>
