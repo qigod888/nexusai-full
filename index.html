@@ -351,6 +351,26 @@ body{
   .suggestion-chip{max-width:100%;font-size:12px}
 }
 </style>
+  <script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
+
+let embedderPromise = null;
+
+// Лениво загружаем модель при первом запросе
+export async function getEmbedding(text) {
+  if (!embedderPromise) {
+    embedderPromise = pipeline(
+      'feature-extraction',
+      'Xenova/multilingual-e5-small'
+    );
+  }
+  const embedder = await embedderPromise;
+  const output = await embedder(text, { pooling: 'mean', normalize: true });
+  return Array.from(output.data);
+}
+
+window.getEmbedding = getEmbedding;
+</script>
 </head>
 <body>
 
@@ -606,24 +626,43 @@ async function sendMessage(){
   appendTyping();
 
   try{
+    // 1) эмбеддинг вопроса в браузере
+    const queryEmbedding = await window.getEmbedding(text);
+
+    // 2) запрос в /api/search за контекстом книги
+    const searchRes = await fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ queryEmbedding, topK: 4 })
+    });
+    const { context } = await searchRes.json();
+
+    // 3) запрос в /api/chat с контекстом
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: [
-          { role:'system', content: SYSTEM_PROMPT },
+          {
+            role:'system',
+            content: SYSTEM_PROMPT +
+              '\n\nВот выдержки из книги, на которые можно опираться при ответе:\n\n' +
+              (context || '')
+          },
           ...messages.slice(-10)
         ]
       })
     });
+
     const data = await res.json();
     const reply = data?.choices?.[0]?.message?.content || 'Не удалось получить ответ. Попробуйте ещё раз.';
     messages.push({ role:'assistant', content: reply });
     removeTyping();
     appendBot(reply);
   } catch(e){
+    console.error(e);
     removeTyping();
-    appendBot('Произошла ошибка при обращении к AI. Проверьте соединение и попробуйте снова.');
+    appendBot('Произошла ошибка при обращении к AI или поиску по книге. Попробуйте ещё раз.');
   }
 
   isLoading = false;
