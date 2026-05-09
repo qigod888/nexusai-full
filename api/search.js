@@ -1,14 +1,35 @@
 // api/search.js
-import bookData from '../public/book.json';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// ESM-утилиты для __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Загружаем book.json один раз при старте функции
+let bookData = [];
+
+try {
+  const bookPath = path.join(__dirname, '..', 'public', 'book.json');
+  const raw = fs.readFileSync(bookPath, 'utf-8');
+  bookData = JSON.parse(raw);
+  console.log('book.json loaded, chunks:', bookData.length);
+} catch (e) {
+  console.error('Failed to load book.json:', e);
+  bookData = [];
+}
 
 // Косинусное сходство для двух массивов чисел
 function cosineSim(a, b) {
   let dot = 0, na = 0, nb = 0;
-  for (let i = 0; i < a.length; i++) {
+  const len = Math.min(a.length, b.length);
+  for (let i = 0; i < len; i++) {
     dot += a[i] * b[i];
     na += a[i] ** 2;
     nb += b[i] ** 2;
   }
+  if (!na || !nb) return 0;
   return dot / (Math.sqrt(na) * Math.sqrt(nb));
 }
 
@@ -25,13 +46,17 @@ export default async function handler(req, res) {
       return;
     }
 
+    if (!bookData.length) {
+      res.status(500).json({ error: 'book_not_loaded' });
+      return;
+    }
+
     // считаем similarity для каждого чанка
     const scored = bookData.map(item => ({
       text: item.text,
       score: cosineSim(queryEmbedding, item.emb)
     }));
 
-    // сортируем по убыванию и берём topK
     scored.sort((a, b) => b.score - a.score);
     const top = scored.slice(0, topK);
 
@@ -41,7 +66,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({ context });
   } catch (e) {
-    console.error(e);
+    console.error('search error:', e);
     res.status(500).json({ error: 'search_failed', message: e.message });
   }
 }
